@@ -39,6 +39,14 @@
     .arch-hero { text-align: center; padding: 80px 24px 48px; max-width: 640px; margin: 0 auto; }
     .arch-hero h1 { font-size: 2.5rem; margin-bottom: 12px; }
     .arch-hero p { font-size: 1.125rem; color: hsl(var(--muted-foreground)); line-height: 1.6; }
+    .arch-table-wrap { overflow-x: auto; margin: 0 -4px; }
+    .arch-table { min-width: 560px; }
+    @media (max-width: 640px) {
+        .arch-hero { padding: 56px 20px 32px; }
+        .arch-hero h1 { font-size: 1.875rem; }
+        .arch-section { padding: 0 16px; }
+        .arch-diagram { font-size: 0.75rem; padding: 16px; }
+    }
     .arch-toc { border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 48px; }
     .arch-toc a { color: hsl(var(--foreground)); text-decoration: none; font-size: 0.875rem; display: block; padding: 4px 0; }
     .arch-toc a:hover { text-decoration: underline; }
@@ -109,7 +117,7 @@ Media CEK — AES-256-GCM           (per file — generated in browser)
 Image blob / thumbnail            (ciphertext at rest, always)
         </div>
 
-        <table class="arch-table">
+        <div class="arch-table-wrap"><table class="arch-table">
             <tr><th>Key</th><th>Type</th><th>Generated</th><th>Stored</th></tr>
             <tr>
                 <td>User private key</td>
@@ -135,7 +143,7 @@ Image blob / thumbnail            (ciphertext at rest, always)
                 <td>Browser (per upload)</td>
                 <td>Server, wrapped by the workspace DEK (<code class="mono">media.cek_wrapped</code>).</td>
             </tr>
-        </table>
+        </table></div>
 
         <div class="arch-note">
             <strong>Why three tiers?</strong> Rotation cost. Re-keying the workspace DEK only requires
@@ -308,56 +316,63 @@ Invitee browser                            Server
     {{-- 8. Data model --}}
     <section id="data-model">
         <h2>8. Data Model</h2>
-        <table class="arch-table">
+        <div class="arch-table-wrap"><table class="arch-table">
             <tr><th>Table</th><th>Plaintext columns</th><th>Encrypted columns</th></tr>
             <tr>
                 <td><code class="mono">users</code></td>
-                <td>id (uuid), email, role, public_key, timestamps</td>
+                <td>id (uuid pk), email, role, public_key, keypair_salt, recovery_code_salt, recovery_code_hash, timestamps</td>
                 <td>encrypted_private_key, encrypted_private_key_recovery (sealed, not decryptable by server)</td>
             </tr>
             <tr>
                 <td><code class="mono">workspaces</code></td>
-                <td>id, owner_id, dek_version, rekeyed_at, timestamps</td>
+                <td>id (uuid pk), owner_id, dek_version, rekeyed_at, timestamps</td>
                 <td>encrypted_name, name_iv, wrapped_dek_for_owner</td>
             </tr>
             <tr>
                 <td><code class="mono">workspace_members</code></td>
-                <td>id, workspace_id, user_id, role</td>
+                <td>id (uuid pk), workspace_id, user_id, role</td>
                 <td>wrapped_dek (per-member seal)</td>
             </tr>
             <tr>
                 <td><code class="mono">collections</code></td>
-                <td>id, workspace_id, timestamps</td>
+                <td>id (uuid pk), workspace_id, timestamps</td>
                 <td>encrypted_name, encrypted_description (+ IVs)</td>
             </tr>
             <tr>
                 <td><code class="mono">galleries</code></td>
-                <td>id, collection_id, type (private/shared/joint), timestamps</td>
+                <td>id (uuid pk), collection_id, type (private/shared/joint), timestamps</td>
                 <td>encrypted_name, encrypted_description (+ IVs)</td>
             </tr>
             <tr>
+                <td><code class="mono">gallery_members</code></td>
+                <td>id (uuid pk), gallery_id, user_id, role (editor/viewer)</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
                 <td><code class="mono">media</code></td>
-                <td>id, gallery_id, uploaded_by, mime_type, size, blob_path, thumb_path, timestamps</td>
+                <td>id (uuid pk), gallery_id, uploaded_by, mime_type, size, blob_path, thumb_path, timestamps</td>
                 <td>cek_wrapped, iv, thumb_iv, encrypted_title, encrypted_caption (+ IVs)</td>
             </tr>
             <tr>
                 <td><code class="mono">workspace_access_codes</code></td>
-                <td>id, workspace_id, scope, permissions, expires_at, max_uses, use_count, revoked_at, code_hash (Argon2id)</td>
+                <td>id (uuid pk), workspace_id, scope, permissions, expires_at, max_uses, use_count, revoked_at, code_hash (Argon2id)</td>
                 <td>wrapped_dek (sealed to code-derived key), label</td>
             </tr>
             <tr>
                 <td><code class="mono">rekey_jobs</code></td>
-                <td>id, workspace_id, initiated_by, status, totals, timestamps</td>
+                <td>id (uuid pk), workspace_id, initiated_by, status, totals, timestamps</td>
                 <td>member/media/collection/gallery wrap payloads (all ciphertext)</td>
             </tr>
             <tr>
                 <td><code class="mono">audit_logs</code></td>
-                <td>id, actor, subject, action, context (JSON), ip_address, created_at</td>
+                <td>id (uuid pk), actor, subject, action, context (JSON), ip_address, created_at</td>
                 <td>&mdash; (metadata only by design)</td>
             </tr>
-        </table>
+        </table></div>
         <p style="margin-top:12px">
-            All primary keys are UUIDs — no sequential IDs to enumerate, and safe to expose in URLs.
+            Every application table uses a UUID primary key — no sequential IDs to enumerate,
+            and identifiers are safe to expose in URLs. (Laravel's internal <code class="mono">jobs</code>
+            and <code class="mono">cache</code> tables are the only exceptions; they hold no user data.)
         </p>
     </section>
 
@@ -387,7 +402,7 @@ Request ──► 1. Super Admin?  ──► metadata-level access only (never c
     {{-- 10. Threat model --}}
     <section id="threat-model">
         <h2>10. Threat Model</h2>
-        <table class="arch-table">
+        <div class="arch-table-wrap"><table class="arch-table">
             <tr><th>Scenario</th><th>What's exposed</th><th>What's safe</th></tr>
             <tr>
                 <td>Database dump</td>
@@ -424,7 +439,7 @@ Request ──► 1. Super Admin?  ──► metadata-level access only (never c
                 <td>&mdash;</td>
                 <td>Nothing can recover the data — by design (no backdoor exists)</td>
             </tr>
-        </table>
+        </table></div>
     </section>
 
     {{-- 11. Tradeoffs --}}

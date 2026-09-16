@@ -51,7 +51,7 @@ class MediaController extends Controller
         $this->authorize('create', [Media::class, $gallery]);
 
         $validated = $request->validate([
-            'ciphertext' => ['required', 'file', 'max:25600'], // 25MB ciphertext
+            'ciphertext' => ['required', 'file', 'max:102400'], // 100MB ciphertext (video support)
             'thumbnail' => ['nullable', 'file', 'max:2048'],
             'cek_wrapped' => ['required', 'string'],
             'iv' => ['required', 'string'],

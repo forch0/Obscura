@@ -177,10 +177,15 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
 
 .app-content {
     flex: 1;
-    padding: 24px;
+    padding: 16px;
+    padding-bottom: calc(56px + 24px + env(safe-area-inset-bottom, 0)); /* clear fixed bottom nav */
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+}
+
+@media (min-width: 768px) {
+    .app-content { padding: 24px; }
 }
 
 @media (min-width: 1024px) {
@@ -194,7 +199,7 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0 20px;
+    padding: 0 16px;
     border-bottom: 1px solid hsl(var(--border));
     background: hsl(var(--background));
     position: sticky;
@@ -226,22 +231,28 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
     z-index: 30;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
     .bottom-nav { display: none; }
 }
 
 .bottom-nav a {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 2px;
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
     color: hsl(var(--muted-foreground));
     text-decoration: none;
-    padding: 4px 12px;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color var(--transition), background var(--transition);
 }
 
-.bottom-nav a.active { color: hsl(var(--foreground)); }
+.bottom-nav a:hover { color: hsl(var(--foreground)); }
+.bottom-nav a.active { color: hsl(var(--foreground)); background: hsl(var(--muted)); }
 
 /* ============================================
    Cards
@@ -251,8 +262,12 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
-    padding: 24px;
+    padding: 20px;
     color: hsl(var(--card-foreground));
+}
+
+@media (min-width: 768px) {
+    .card { padding: 24px; }
 }
 
 /* ============================================
@@ -453,8 +468,12 @@ select.form-input { cursor: pointer; }
 
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+@media (min-width: 414px) {
+    .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 
 @media (min-width: 768px) {

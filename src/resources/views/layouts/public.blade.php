@@ -54,6 +54,11 @@
             color: hsl(var(--foreground));
         }
 
+        @media (max-width: 720px) {
+            .public-nav .links a:not(.btn):not(.nav-primary) { display: none; }
+            .public-nav { padding: 0 16px; }
+        }
+
         .public-footer {
             text-align: center;
             padding: 32px 24px;
@@ -81,7 +86,7 @@
             @auth
                 <a href="{{ route('workspaces.index') }}" class="btn btn-primary btn-sm">Dashboard</a>
             @else
-                <a href="{{ route('login') }}">Sign In</a>
+                <a href="{{ route('login') }}" class="nav-primary">Sign In</a>
                 <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Get Started</a>
             @endauth
         </div>

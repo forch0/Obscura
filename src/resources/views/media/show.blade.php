@@ -63,8 +63,25 @@
                 }
 
                 const url = await fetchAndDecryptMedia(`/media/${mediaId}/blob`, dekHandle);
-                document.getElementById('media-viewer').innerHTML =
-                    `<img src="${url}" style="max-width:100%;max-height:80vh;border-radius:12px" alt="">`;
+                const viewer = document.getElementById('media-viewer');
+                const mime = media.mime_type || '';
+
+                if (mime.startsWith('image/')) {
+                    viewer.innerHTML = `<img src="${url}" style="max-width:100%;max-height:80vh;border-radius:8px" alt="">`;
+                } else if (mime.startsWith('video/')) {
+                    viewer.innerHTML = `<video src="${url}" controls playsinline style="max-width:100%;max-height:80vh;border-radius:8px"></video>`;
+                } else if (mime === 'application/pdf') {
+                    viewer.innerHTML = `
+                        <embed src="${url}" type="application/pdf" style="width:100%;height:75vh;border:1px solid hsl(var(--border));border-radius:8px">
+                        <p style="margin-top:12px"><a href="${url}" download class="btn btn-secondary btn-sm">Download PDF</a></p>`;
+                } else {
+                    viewer.innerHTML = `
+                        <div class="card" style="display:inline-block;padding:32px 48px;text-align:center">
+                            <p class="font-medium" style="margin-bottom:4px">${mime || 'Unknown type'}</p>
+                            <p class="text-caption" style="margin-bottom:16px">Decrypted — ready to download</p>
+                            <a href="${url}" download class="btn btn-primary">Download File</a>
+                        </div>`;
+                }
             } catch (e) {
                 document.getElementById('media-viewer').innerHTML = `<p class="decrypt-status">Failed to decrypt: ${e.message}</p>`;
             }

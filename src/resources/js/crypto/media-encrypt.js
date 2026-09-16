@@ -87,8 +87,20 @@ export async function decryptTextField(ciphertextB64, ivB64, dekHandle) {
 
 /**
  * Generate an encrypted JPEG thumbnail (max 320px) using the file's CEK.
+ * Images → canvas decode. Video → first-frame grab. Everything else → null
+ * (grid shows a type icon; has_thumbnail stays false).
  */
 async function generateEncryptedThumbnail(file, cek) {
+    if (file.type.startsWith('image/')) {
+        return await thumbnailFromImage(file, cek);
+    }
+    if (file.type.startsWith('video/')) {
+        return await thumbnailFromVideo(file, cek);
+    }
+    throw new Error('No thumbnail strategy for ' + file.type);
+}
+
+async function thumbnailFromImage(file, cek) {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(320 / bitmap.width, 320 / bitmap.height, 1);
     const w = Math.max(1, Math.round(bitmap.width * scale));
@@ -100,11 +112,45 @@ async function generateEncryptedThumbnail(file, cek) {
     bitmap.close();
 
     const thumbBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.75 });
+    return await encryptThumb(thumbBlob, cek);
+}
+
+async function thumbnailFromVideo(file, cek) {
+    const url = URL.createObjectURL(file);
+    try {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        video.src = url;
+
+        await new Promise((resolve, reject) => {
+            video.onloadeddata = () => { video.currentTime = Math.min(0.5, video.duration || 0); };
+            video.onseeked = resolve;
+            video.onerror = () => reject(new Error('video decode failed'));
+        });
+
+        const scale = Math.min(320 / video.videoWidth, 320 / video.videoHeight, 1);
+        const w = Math.max(1, Math.round(video.videoWidth * scale));
+        const h = Math.max(1, Math.round(video.videoHeight * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+
+        const thumbBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.75));
+        return await encryptThumb(thumbBlob, cek);
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
+async function encryptThumb(thumbBlob, cek) {
     const thumbBytes = await thumbBlob.arrayBuffer();
     const thumbIvBytes = crypto.getRandomValues(new Uint8Array(12));
     const thumbCiphertext = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv: thumbIvBytes }, cek, thumbBytes
     );
-
     return { blob: new Blob([thumbCiphertext]), iv: base64Encode(thumbIvBytes) };
 }

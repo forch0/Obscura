@@ -29,6 +29,12 @@
         font-size: 0.875rem; color: hsl(var(--muted-foreground));
         list-style: disc; line-height: 1.8;
     }
+    @media (max-width: 640px) {
+        .uc-hero { padding: 56px 20px 32px; }
+        .uc-hero h1 { font-size: 1.875rem; }
+        .uc-section { padding: 0 16px 48px; }
+        .use-case { padding: 20px; }
+    }
 </style>
 
 <section class="uc-hero">

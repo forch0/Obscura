@@ -15,7 +15,7 @@
             @endif
             <x-button variant="secondary" href="{{ route('galleries.edit', [$collection, $gallery]) }}">Edit</x-button>
             <x-button variant="primary" id="upload-btn">Upload</x-button>
-            <input type="file" id="upload-input" accept="image/*" style="display:none">
+            <input type="file" id="upload-input" accept="image/*,video/*,.heic,.heif,application/pdf" style="display:none">
         </div>
     </div>
 
@@ -45,6 +45,19 @@
         const csrf = document.querySelector('meta[name=csrf-token]').content;
         const typeLabels = { private: 'Private', shared: 'Shared', joint: 'Joint' };
         const typeBadge = { private: '', shared: 'badge-primary', joint: 'badge-secondary' };
+
+        const fileIcon = (mime) => {
+            if (mime?.startsWith('video/')) return '&#9654;';
+            if (mime === 'application/pdf') return '&#128441;';
+            if (mime === 'image/heic' || mime === 'image/heif') return '&#128444;';
+            return '&#128206;';
+        };
+        const fileKind = (mime) => {
+            if (mime?.startsWith('video/')) return 'Video';
+            if (mime === 'application/pdf') return 'PDF';
+            if (mime === 'image/heic' || mime === 'image/heif') return 'HEIC';
+            return 'File';
+        };
 
         let dekHandle;
 
@@ -110,10 +123,10 @@
                             el.innerHTML = `<img src="${url}" alt="" loading="lazy">`;
                         })
                         .catch(() => {
-                            document.getElementById(`thumb-${m.id}`).innerHTML = '<span class="text-muted">No preview</span>';
+                            document.getElementById(`thumb-${m.id}`).innerHTML = `<span style="font-size:1.5rem;color:hsl(var(--muted-foreground))">${fileIcon(m.mime_type)}</span>`;
                         });
                 } else {
-                    document.getElementById(`thumb-${m.id}`).innerHTML = '<span class="text-muted">No preview</span>';
+                    document.getElementById(`thumb-${m.id}`).innerHTML = `<div style="text-align:center"><span style="font-size:1.5rem;color:hsl(var(--muted-foreground))">${fileIcon(m.mime_type)}</span><p class="text-caption" style="margin-top:4px">${fileKind(m.mime_type)}</p></div>`;
                 }
             }
 

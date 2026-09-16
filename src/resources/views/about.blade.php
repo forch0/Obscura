@@ -64,8 +64,8 @@
     {{-- Security Model --}}
     <section style="margin-bottom:40px">
         <h2 style="margin-bottom:24px">Security Model</h2>
-        <div class="card">
-            <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+        <div class="card" style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:0.875rem;min-width:480px">
                 <thead>
                     <tr style="border-bottom:1px solid hsl(var(--border))">
                         <th style="text-align:left;padding:10px 0;font-weight:600">Layer</th>
@@ -158,7 +158,7 @@
     <section style="margin-bottom:40px">
         <h2 style="margin-bottom:24px">Roles &amp; Permissions</h2>
         <div class="card" style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+            <table style="width:100%;border-collapse:collapse;font-size:0.875rem;min-width:560px">
                 <thead>
                     <tr style="border-bottom:1px solid hsl(var(--border))">
                         <th style="text-align:left;padding:10px 0;font-weight:600">Role</th>
