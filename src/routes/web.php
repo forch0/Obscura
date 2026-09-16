@@ -11,6 +11,7 @@ use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\GalleryMemberController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\RekeyController;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
@@ -92,4 +93,10 @@ Route::middleware(['auth', 'keypair'])->group(function () {
     Route::delete('media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
     Route::get('media/{medium}/blob', [MediaController::class, 'blob'])->name('media.blob');
     Route::get('media/{medium}/thumbnail', [MediaController::class, 'thumbnail'])->name('media.thumbnail');
+
+    // Re-key (owner only)
+    Route::get('workspaces/{workspace}/rekey', [RekeyController::class, 'show'])->name('workspaces.rekey');
+    Route::post('workspaces/{workspace}/rekey', [RekeyController::class, 'initiate'])->name('workspaces.rekey.initiate');
+    Route::get('workspaces/{workspace}/rekey/status', [RekeyController::class, 'status'])->name('workspaces.rekey.status');
+    Route::post('workspaces/{workspace}/rekey/{job}/complete', [RekeyController::class, 'complete'])->name('workspaces.rekey.complete');
 });

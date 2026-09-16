@@ -16,6 +16,7 @@ export default defineConfig({
                 'resources/js/crypto/code-key.js',
                 'resources/js/crypto/media-encrypt.js',
                 'resources/js/crypto/media-decrypt.js',
+                'resources/js/crypto/rekey.js',
             ],
             refresh: true,
         }),

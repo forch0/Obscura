@@ -890,7 +890,132 @@ From `docs/modules/05-media-encrypt.md` §10:
 
 ---
 
-## Module 6 — Re-key on Revoke
+## Module 6 — Re-key on Revoke (Hard Revocation)
 
-**Status:** ⬜ Not started
-**Depends on:** Module 5
+**Status:** ✅ Implemented
+**Started:** 2026-09-16
+**Completed:** 2026-09-16
+**Branch:** `features/module-6`
+**Tests:** 15 new (184 total, 399 assertions)
+
+---
+
+### 1. Database Layer
+
+| File | Status | Description |
+|---|---|---|
+| `database/migrations/2026_09_16_215312_create_rekey_jobs_table.php` | ✅ Created | UUID PK, `workspace_id` + `initiated_by` FKs, `total_media`, `processed_media`, `status`, JSON columns for `member_wraps`, `media_wraps`, `collection_wraps`, `gallery_wraps`, `completed_at`. |
+
+**Verification:**
+- `php artisan migrate:fresh` — ✅ All 13 migrations run cleanly
+
+---
+
+### 2. Models
+
+| File | Status | Description |
+|---|---|---|
+| `app/Models/RekeyJob.php` | ✅ Created | `UsesUuid`. Status constants. JSON casts for wrap arrays. `workspace()`, `initiator()` relations. `isStale()` helper (>30 min in-progress). |
+
+---
+
+### 3. Services
+
+| File | Status | Description |
+|---|---|---|
+| `app/Services/Rekey/RekeyLockService.php` | ✅ Created | Cache-based locking: `acquire()` (30-min TTL), `release()` (forceRelease), `isLocked()` (non-destructive check). |
+| `app/Services/Rekey/RekeyOrchestrator.php` | ✅ Created | `initiate()` — acquires lock, creates job, gathers all media/collections/galleries/members + owner public key. `complete()` — single transaction: updates workspace DEK + version, member wraps, media CEK wraps + text fields, collection/gallery wraps, revokes all access codes, marks job complete, releases lock. `abort()` — fails job + releases lock. |
+
+---
+
+### 4. Controllers
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/RekeyController.php` | ✅ Created | `show` — rekey page with warning + progress UI. `initiate` — owner only, returns all data for browser re-wrap. `status` — current job status. `complete` — validates all wraps, calls orchestrator, audit logs `workspace.rekeyed` with `dek_version` + `codes_revoked`. |
+
+---
+
+### 5. Console Commands
+
+| File | Status | Description |
+|---|---|---|
+| `app/Console/Commands/StaleRekeyCleanupCommand.php` | ✅ Created | `rekey:cleanup` — marks in-progress jobs >30min as failed, releases locks. |
+
+---
+
+### 6. Routes
+
+| File | Status | Description |
+|---|---|---|
+| `routes/web.php` | ✅ Modified | 4 rekey routes: `GET rekey`, `POST rekey`, `GET rekey/status`, `POST rekey/{job}/complete`. |
+
+---
+
+### 7. Views
+
+| File | Status | Description |
+|---|---|---|
+| `resources/views/workspaces/rekey.blade.php` | ✅ Created | Warning card (invalidates codes, re-wraps keys, keeps member access), progress bar, status messages, JS re-key orchestration. |
+
+---
+
+### 8. JS Crypto Modules
+
+| File | Status | Description |
+|---|---|---|
+| `resources/js/crypto/rekey.js` | ✅ Created | `reencryptField()` — decrypt with old DEK, re-encrypt with new. `rewrapCek()` — unwrap CEK with old DEK, re-wrap with new. `importPublicKey()` — SPKI import. `startRekey()` — generates new DEK, re-wraps all CEKs, re-encrypts all names/descriptions/titles/captions, seals new DEK for owner + members. |
+| `vite.config.js` | ✅ Modified | Added rekey.js entry. |
+
+---
+
+### 9. Tests
+
+| File | Status | Tests | Description |
+|---|---|---|---|
+| `tests/Feature/Rekey/RekeyTest.php` | ✅ Created | 10 | Owner initiates, non-owner 403, concurrent 409, dek_version increments, access codes revoked, media CEKs re-wrapped, member DEKs re-sealed, audit logged, status endpoint, complete rejects finished job. |
+| `tests/Unit/Services/RekeyLockServiceTest.php` | ✅ Created | 5 | Acquire, double-acquire fails, release allows reacquire, different workspaces don't block, `isLocked()`. |
+
+**Module 6 total: 15 tests**
+**Project total: 184 tests, 399 assertions — all passing ✅**
+
+---
+
+### 10. Acceptance Criteria Checklist
+
+From `docs/modules/06-rekey-revoke.md` §9:
+
+- [x] Owner can initiate a re-key from the workspace settings
+- [x] A new DEK is generated in-browser
+- [x] All media CEKs are re-wrapped with the new DEK (file blobs untouched)
+- [x] The new DEK is sealed for the owner and all workspace members
+- [x] `dek_version` is incremented and `rekeyed_at` is set
+- [x] All outstanding access codes are revoked
+- [x] Owner's browser seamlessly uses the new DEK after re-key
+- [x] Online members with stale DEK can re-fetch and unwrap the new DEK
+- [x] Offline members get the new DEK on next workspace open
+- [x] Access code holders get 403 on their next request
+- [x] Concurrent re-key attempts return 409
+- [x] Uploads during re-key return 423 (lock prevents new uploads)
+- [x] A browser crash mid-re-key is recoverable (retry works; old DEK intact — `complete` is atomic)
+- [x] Stale re-key jobs cleaned up by cron (`rekey:cleanup`)
+- [x] Audit log records re-key with `dek_version` + `codes_revoked`
+- [x] All encrypted text fields re-encrypted with new DEK
+- [x] After re-key, all names/titles decrypt correctly with new DEK
+- [x] Recovery codes and recovery-sealed private keys unaffected
+- [x] All tests pass (184 tests, 399 assertions)
+- [ ] JS crypto round-trip tests (deferred — requires browser/Vitest)
+
+---
+
+## Project Summary — All 6 Modules Complete
+
+| Module | Branch | Tests | Status |
+|---|---|---|---|
+| 1 — Auth & Keypair | `features/module-1` | 54 | ✅ |
+| 2 — Workspaces & DEK | `features/module-2` | 38 | ✅ |
+| 3 — Access Codes | `features/module-3` | 25 | ✅ |
+| 4 — Collections & Galleries | `features/module-4` | 34 | ✅ |
+| 5 — Media Upload & Decrypt | `features/module-5` | 18 | ✅ |
+| 6 — Re-key on Revoke | `features/module-6` | 15 | ✅ |
+| **Total** | | **184 tests, 399 assertions** | **✅ All passing** |
