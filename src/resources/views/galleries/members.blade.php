@@ -1,0 +1,51 @@
+@extends('layouts.app')
+
+@section('title', 'Gallery Members — Obscura')
+
+@section('content')
+    <div class="page-header">
+        <div>
+            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:var(--accent);text-decoration:none">← Back to gallery</a></p>
+            <h2 style="margin-top:4px">Gallery Members</h2>
+            <p class="text-caption"><span class="badge {{ $gallery->type === 'joint' ? 'badge-success' : 'badge-accent' }}">{{ ucfirst($gallery->type) }}</span></p>
+        </div>
+    </div>
+
+    <div class="card" style="max-width:560px;margin-bottom:24px">
+        <h3>Add Member</h3>
+        <p class="text-caption text-secondary" style="margin-bottom:16px">Members must already be workspace members.</p>
+        <form method="POST" action="{{ route('galleries.members.store', [$collection, $gallery]) }}">
+            @csrf
+            <x-input label="User ID" name="user_id" placeholder="UUID of workspace member" required />
+            <div class="form-group">
+                <label for="role" class="form-label">Role</label>
+                <select id="role" name="role" class="form-input">
+                    <option value="viewer">Viewer — can view media</option>
+                    @if($gallery->isJoint())
+                        <option value="editor">Editor — can upload/edit media</option>
+                    @endif
+                </select>
+            </div>
+            <x-button type="submit" variant="primary">Add Member</x-button>
+        </form>
+    </div>
+
+    <h3 style="margin-bottom:12px">Current Members</h3>
+    @forelse($members as $member)
+        <div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
+            <div>
+                <p class="font-medium">{{ $member->user->email }}</p>
+                <span class="badge {{ $member->role === 'editor' ? 'badge-success' : '' }}">{{ ucfirst($member->role) }}</span>
+            </div>
+            <div class="flex gap-2">
+                <form method="POST" action="{{ route('galleries.members.destroy', [$collection, $gallery, $member]) }}" style="display:inline" onsubmit="return confirm('Remove this member?')">
+                    @csrf
+                    @method('DELETE')
+                    <x-button type="submit" variant="danger" size="sm">Remove</x-button>
+                </form>
+            </div>
+        </div>
+    @empty
+        <x-empty-state title="No members" message="Add workspace members to collaborate on this gallery." />
+    @endforelse
+@endsection

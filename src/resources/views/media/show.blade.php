@@ -5,21 +5,19 @@
 @section('content')
     <div class="page-header">
         <div>
-            <p style="font-size:0.875rem;color:var(--text-secondary)"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:var(--accent);text-decoration:none">← Back to gallery</a></p>
+            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:var(--accent);text-decoration:none">← Back to gallery</a></p>
             <h2 id="media-title" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
         </div>
-        <div>
-            <form method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline" onsubmit="return confirm('Delete this media?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn-danger">Delete</button>
-            </form>
-        </div>
+        <form method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline" onsubmit="return confirm('Delete this media?')">
+            @csrf
+            @method('DELETE')
+            <x-button type="submit" variant="danger">Delete</x-button>
+        </form>
     </div>
 
     <div id="media-viewer" style="text-align:center;padding:24px">
         <span class="spinner"></span>
-        <p class="decrypt-status">Decrypting image…</p>
+        <p class="decrypt-status" style="margin-top:12px">Decrypting image…</p>
     </div>
     <div id="media-caption"></div>
 @endsection
@@ -61,7 +59,7 @@
                 }
                 if (media.encrypted_caption) {
                     const cap = await decryptTextField(media.encrypted_caption, media.caption_iv, dekHandle);
-                    document.getElementById('media-caption').innerHTML = `<p style="color:var(--text-secondary);text-align:center">${cap}</p>`;
+                    document.getElementById('media-caption').innerHTML = `<p class="text-caption text-secondary" style="text-align:center">${cap}</p>`;
                 }
 
                 const url = await fetchAndDecryptMedia(`/media/${mediaId}/blob`, dekHandle);

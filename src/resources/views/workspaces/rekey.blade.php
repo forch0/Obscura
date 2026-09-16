@@ -5,33 +5,31 @@
 @section('content')
     <div class="page-header">
         <h2>Re-key Workspace</h2>
-        <a href="{{ route('workspaces.show', $workspace) }}" class="btn-secondary">Cancel</a>
+        <x-button variant="secondary" href="{{ route('workspaces.show', $workspace) }}">Cancel</x-button>
     </div>
 
-    <div class="workspace-card" style="max-width:560px">
+    <div class="card" style="max-width:560px">
         <h3 style="color:var(--danger)">Warning</h3>
-        <p>Re-keying generates a new encryption key for this workspace. This will:</p>
-        <ul style="margin:12px 0;padding-left:20px;color:var(--text-secondary);font-size:0.875rem">
+        <p class="text-secondary">Re-keying generates a new encryption key for this workspace. This will:</p>
+        <ul style="margin:12px 0;padding-left:20px;color:var(--text-secondary);font-size:0.875rem;list-style:disc">
             <li><strong>Invalidate all access codes</strong> — code holders will need new codes</li>
             <li><strong>Re-wrap all media keys</strong> — file contents are not re-encrypted, only the key wraps</li>
             <li><strong>Re-encrypt all names/descriptions</strong> — collections, galleries, media titles</li>
             <li><strong>Keep member access</strong> — members get the new key automatically</li>
         </ul>
-        <p style="font-size:0.8125rem;color:var(--text-secondary)">Current DEK version: {{ $workspace->dek_version }}</p>
+        <p class="text-caption text-muted">Current DEK version: {{ $workspace->dek_version }}</p>
 
         @if($activeJob)
             <div style="margin-top:16px;padding:12px;background:var(--accent-subtle);border-radius:8px">
-                <p style="font-size:0.875rem">A re-key is already in progress ({{ $activeJob->processed_media }}/{{ $activeJob->total_media }} media).</p>
+                <p class="text-sm">A re-key is already in progress ({{ $activeJob->processed_media }}/{{ $activeJob->total_media }} media).</p>
             </div>
         @else
-            <button type="button" class="btn-danger" id="start-rekey" style="margin-top:16px">Start Re-key</button>
+            <x-button variant="danger" id="start-rekey" style="margin-top:16px">Start Re-key</x-button>
         @endif
 
         <div id="rekey-progress" style="display:none;margin-top:16px">
             <p id="rekey-status" class="decrypt-status"></p>
-            <div style="background:var(--bg-muted);border-radius:8px;height:8px;margin-top:8px;overflow:hidden">
-                <div id="rekey-bar" style="background:var(--accent);height:100%;width:0%;transition:width 0.3s"></div>
-            </div>
+            <x-progress-bar id="rekey-bar" :percent="0" style="margin-top:8px" />
         </div>
     </div>
 @endsection
@@ -43,7 +41,7 @@
         const btn = document.getElementById('start-rekey');
         const progress = document.getElementById('rekey-progress');
         const statusEl = document.getElementById('rekey-status');
-        const bar = document.getElementById('rekey-bar');
+        const bar = document.querySelector('#rekey-bar .fill');
 
         btn?.addEventListener('click', async () => {
             if (!confirm('This will invalidate all access codes. Continue?')) return;
@@ -53,7 +51,6 @@
             statusEl.innerHTML = '<span class="spinner"></span> Starting re-key…';
 
             try {
-                // Step 1: Initiate — get all data to re-wrap
                 const res = await fetch(`/workspaces/${workspaceId}/rekey`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
@@ -66,20 +63,16 @@
                 if (!res.ok) throw new Error('Failed to initiate re-key');
                 const data = await res.json();
 
-                // Step 2: Browser-side re-key
                 statusEl.innerHTML = '<span class="spinner"></span> Generating new DEK…';
                 const { startRekey } = await import('{{ Vite::asset("resources/js/crypto/rekey.js") }}');
                 const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
-                const { unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
                 const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const privateKey = getPrivateKeyHandle();
                 const oldDek = getWorkspaceDek(workspaceId);
                 if (!oldDek) throw new Error('Workspace DEK not loaded.');
 
                 const result = await startRekey(oldDek, data);
 
-                // Step 3: Complete — send all wraps to server
                 statusEl.innerHTML = '<span class="spinner"></span> Applying changes…';
                 bar.style.width = '50%';
 
@@ -102,7 +95,6 @@
                 if (!completeRes.ok) throw new Error('Failed to complete re-key');
                 const done = await completeRes.json();
 
-                // Update the session DEK
                 setWorkspaceDek(workspaceId, result.newDekHandle);
 
                 bar.style.width = '100%';

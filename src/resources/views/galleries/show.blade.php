@@ -5,29 +5,27 @@
 @section('content')
     <div class="page-header">
         <div>
-            <p style="font-size:0.875rem;color:var(--text-secondary)"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:var(--accent);text-decoration:none">← Back to collection</a></p>
+            <p class="text-caption"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:var(--accent);text-decoration:none">← Back to collection</a></p>
             <h2 id="gallery-name" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
-            <p id="gallery-type" style="font-size:0.8125rem;color:var(--text-secondary)"></p>
+            <p id="gallery-type" class="text-caption"></p>
         </div>
-        <div>
+        <div class="flex gap-2">
             @if($gallery->type !== 'private')
-                <a href="{{ route('galleries.members', [$collection, $gallery]) }}" class="btn-secondary">Members</a>
+                <x-button variant="secondary" href="{{ route('galleries.members', [$collection, $gallery]) }}">Members</x-button>
             @endif
-            <a href="{{ route('galleries.edit', [$collection, $gallery]) }}" class="btn-secondary">Edit</a>
-            <button type="button" class="btn-primary" id="upload-btn">Upload</button>
+            <x-button variant="secondary" href="{{ route('galleries.edit', [$collection, $gallery]) }}">Edit</x-button>
+            <x-button variant="primary" id="upload-btn">Upload</x-button>
             <input type="file" id="upload-input" accept="image/*" style="display:none">
         </div>
     </div>
 
     <div id="gallery-description"></div>
-
     <div id="upload-status" class="decrypt-status" style="display:none"></div>
 
-    <h3 style="margin-top:32px;margin-bottom:16px;font-size:1.125rem;font-weight:600">Media</h3>
-    <div id="media-grid" class="workspace-grid"></div>
-    <div id="media-empty" class="empty-state" style="display:none">
-        <h3>No media yet</h3>
-        <p>Upload encrypted images to this gallery.</p>
+    <h3 style="margin-top:32px;margin-bottom:16px">Media</h3>
+    <div id="media-grid" class="gallery-grid"></div>
+    <div id="media-empty" style="display:none">
+        <x-empty-state title="No media yet" message="Upload encrypted images to this gallery." />
     </div>
 @endsection
 
@@ -46,6 +44,7 @@
         const collectionId = collection.id;
         const csrf = document.querySelector('meta[name=csrf-token]').content;
         const typeLabels = { private: 'Private', shared: 'Shared', joint: 'Joint' };
+        const typeBadge = { private: '', shared: 'badge-accent', joint: 'badge-success' };
 
         let dekHandle;
 
@@ -68,14 +67,14 @@
 
             const name = await decryptName(gallery.encrypted_name, dekHandle, gallery.name_iv);
             document.getElementById('gallery-name').textContent = name;
-            document.getElementById('gallery-type').textContent = typeLabels[gallery.type] || gallery.type;
+            document.getElementById('gallery-type').innerHTML = `<span class="badge ${typeBadge[gallery.type] || ''}">${typeLabels[gallery.type] || gallery.type}</span>`;
 
             if (gallery.encrypted_description) {
                 const desc = await decryptName(gallery.encrypted_description, dekHandle, gallery.description_iv);
-                document.getElementById('gallery-description').innerHTML = `<p style="color:var(--text-secondary);font-size:0.875rem">${desc}</p>`;
+                document.getElementById('gallery-description').innerHTML = `<p class="text-caption text-secondary">${desc}</p>`;
             }
 
-            // Load media list
+            // Load media
             const res = await fetch(`/galleries/${galleryId}/media`, { headers: { 'Accept': 'application/json' } });
             const { media } = await res.json();
 
@@ -86,9 +85,8 @@
 
             for (const m of media) {
                 const card = document.createElement('div');
-                card.className = 'workspace-card';
-                card.style.padding = '0';
-                card.style.overflow = 'hidden';
+                card.className = 'gallery-card';
+                card.style.cursor = 'pointer';
 
                 let title = '(untitled)';
                 try {
@@ -96,35 +94,30 @@
                 } catch (e) {}
 
                 card.innerHTML = `
-                    <div style="aspect-ratio:1;background:var(--bg-muted);display:flex;align-items:center;justify-content:center" id="thumb-${m.id}">
-                        <span class="spinner"></span>
-                    </div>
-                    <div style="padding:12px">
-                        <p style="font-size:0.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${title}</p>
-                        <p style="font-size:0.75rem;color:var(--text-secondary)">${(m.size / 1024).toFixed(0)} KB</p>
+                    <div class="thumb" id="thumb-${m.id}"><span class="spinner"></span></div>
+                    <div class="meta">
+                        <p class="title">${title}</p>
+                        <p class="detail">${(m.size / 1024).toFixed(0)} KB</p>
                     </div>
                 `;
-                card.querySelector('div').addEventListener('click', () => {
-                    window.location.href = `/media/${m.id}`;
-                });
+                card.addEventListener('click', () => { window.location.href = `/media/${m.id}`; });
                 grid.appendChild(card);
 
-                // Decrypt thumbnail
                 if (m.has_thumbnail) {
                     fetchAndDecryptMedia(`/media/${m.id}/thumbnail`, dekHandle)
                         .then(url => {
                             const el = document.getElementById(`thumb-${m.id}`);
-                            el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+                            el.innerHTML = `<img src="${url}" alt="" loading="lazy">`;
                         })
                         .catch(() => {
-                            document.getElementById(`thumb-${m.id}`).innerHTML = '<span style="color:var(--text-secondary)">No preview</span>';
+                            document.getElementById(`thumb-${m.id}`).innerHTML = '<span class="text-muted">No preview</span>';
                         });
                 } else {
-                    document.getElementById(`thumb-${m.id}`).innerHTML = '<span style="color:var(--text-secondary)">No preview</span>';
+                    document.getElementById(`thumb-${m.id}`).innerHTML = '<span class="text-muted">No preview</span>';
                 }
             }
 
-            // Upload handler
+            // Upload
             const uploadBtn = document.getElementById('upload-btn');
             const uploadInput = document.getElementById('upload-input');
             const uploadStatus = document.getElementById('upload-status');

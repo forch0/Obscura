@@ -5,37 +5,36 @@
 @section('content')
     <div class="page-header">
         <h2>New Gallery</h2>
-        <a href="{{ route('collections.show', [$workspace, $collection]) }}" class="btn-secondary">Cancel</a>
+        <x-button variant="secondary" href="{{ route('collections.show', [$workspace, $collection]) }}">Cancel</x-button>
     </div>
 
-    <form id="create-gallery-form" style="max-width:480px">
-        @csrf
-        <div class="form-group">
-            <label for="name">Gallery Name</label>
-            <input type="text" id="name" class="form-input" placeholder="Beach Photos" required>
-        </div>
-        <div class="form-group">
-            <label>Type</label>
-            <select id="type" class="form-input">
-                <option value="private">Private — owner only</option>
-                <option value="shared">Shared — workspace members can view</option>
-                <option value="joint">Joint — editor members can upload/edit</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="description">Description (optional)</label>
-            <textarea id="description" class="form-input" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn-primary" id="submit-btn">Create Gallery</button>
-        <p class="decrypt-status" id="status"></p>
-    </form>
+    <div class="card" style="max-width:560px">
+        <form id="create-gallery-form">
+            @csrf
+            <x-input label="Gallery Name" name="name" placeholder="Beach Photos" required />
+            <div class="form-group">
+                <label for="type" class="form-label">Type</label>
+                <select id="type" name="type" class="form-input">
+                    <option value="private">Private — owner only</option>
+                    <option value="shared">Shared — workspace members can view</option>
+                    <option value="joint">Joint — editor members can upload/edit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description" class="form-label">Description (optional)</label>
+                <textarea id="description" name="description" class="form-input" rows="3"></textarea>
+            </div>
+            <x-button type="submit" variant="primary" size="lg" pill class="w-full">Create Gallery</x-button>
+            <p class="decrypt-status" id="status" style="margin-top:12px"></p>
+        </form>
+    </div>
 @endsection
 
 @push('scripts')
     <script type="module">
         const form = document.getElementById('create-gallery-form');
         const statusEl = document.getElementById('status');
-        const submitBtn = document.getElementById('submit-btn');
+        const submitBtn = form.querySelector('button[type=submit]');
         const workspaceId = '{{ $workspace->id }}';
         const collectionId = '{{ $collection->id }}';
 

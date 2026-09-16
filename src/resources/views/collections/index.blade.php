@@ -5,7 +5,7 @@
 @section('content')
     <div class="page-header">
         <h2 id="workspace-name"><span class="spinner"></span> Loading…</h2>
-        <a href="{{ route('collections.create', $workspace) }}" class="btn-primary">New Collection</a>
+        <x-button variant="primary" pill href="{{ route('collections.create', $workspace) }}">New Collection</x-button>
     </div>
 
     <div id="collections-list">
@@ -13,10 +13,7 @@
     </div>
 
     @if ($collections->isEmpty())
-        <div class="empty-state">
-            <h3>No collections yet</h3>
-            <p>Collections organize your galleries within a workspace.</p>
-        </div>
+        <x-empty-state title="No collections yet" message="Collections organize your galleries within a workspace." :action="route('collections.create', $workspace)" action-label="Create Collection" />
     @endif
 @endsection
 
@@ -37,7 +34,7 @@
 
             const privateKeyHandle = getPrivateKeyHandle();
             if (!privateKeyHandle) {
-                document.getElementById('collections-list').innerHTML = '<p class="decrypt-status">Private key not loaded. Please log in again.</p>';
+                document.getElementById('collections-list').innerHTML = '<p class="decrypt-status">Private key not loaded.</p>';
                 return;
             }
 
@@ -49,30 +46,29 @@
                 setWorkspaceDek(workspaceId, dekHandle);
             }
 
-            // Decrypt workspace name
             const wsName = await decryptName(workspace.encrypted_name, dekHandle, workspace.name_iv);
             document.getElementById('workspace-name').textContent = wsName;
 
             const grid = document.createElement('div');
-            grid.className = 'workspace-grid';
+            grid.className = 'gallery-grid';
 
             for (const c of collections) {
                 try {
                     const name = await decryptName(c.encrypted_name, dekHandle, c.name_iv);
-                    const card = document.createElement('div');
-                    card.className = 'workspace-card';
+                    const card = document.createElement('a');
+                    card.href = `/workspaces/${workspaceId}/collections/${c.id}`;
+                    card.className = 'card';
+                    card.style.textDecoration = 'none';
+                    card.style.color = 'var(--text)';
                     card.innerHTML = `
                         <h3>${name}</h3>
-                        <div class="actions">
-                            <a href="/workspaces/${workspaceId}/collections/${c.id}" class="btn-secondary">Open</a>
-                            <a href="/workspaces/${workspaceId}/collections/${c.id}/edit" class="btn-secondary">Edit</a>
-                        </div>
+                        <p class="text-caption text-secondary" style="margin-top:4px">Collection</p>
                     `;
                     grid.appendChild(card);
                 } catch (e) {
                     const card = document.createElement('div');
-                    card.className = 'workspace-card';
-                    card.innerHTML = `<h3>(decryption failed)</h3><p>${e.message}</p>`;
+                    card.className = 'card';
+                    card.innerHTML = `<h3>(decryption failed)</h3><p class="error-text">${e.message}</p>`;
                     grid.appendChild(card);
                 }
             }

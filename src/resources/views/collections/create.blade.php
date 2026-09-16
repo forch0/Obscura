@@ -5,29 +5,28 @@
 @section('content')
     <div class="page-header">
         <h2>New Collection</h2>
-        <a href="{{ route('collections.index', $workspace) }}" class="btn-secondary">Cancel</a>
+        <x-button variant="secondary" href="{{ route('collections.index', $workspace) }}">Cancel</x-button>
     </div>
 
-    <form id="create-collection-form" style="max-width:480px">
-        @csrf
-        <div class="form-group">
-            <label for="name">Collection Name</label>
-            <input type="text" id="name" class="form-input" placeholder="Summer 2025" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description (optional)</label>
-            <textarea id="description" class="form-input" rows="3" placeholder="Photos from our trip..."></textarea>
-        </div>
-        <button type="submit" class="btn-primary" id="submit-btn">Create Collection</button>
-        <p class="decrypt-status" id="status"></p>
-    </form>
+    <div class="card" style="max-width:560px">
+        <form id="create-collection-form">
+            @csrf
+            <x-input label="Collection Name" name="name" placeholder="Summer 2025" required />
+            <div class="form-group">
+                <label for="description" class="form-label">Description (optional)</label>
+                <textarea id="description" name="description" class="form-input" rows="3" placeholder="Photos from our trip..."></textarea>
+            </div>
+            <x-button type="submit" variant="primary" size="lg" pill class="w-full">Create Collection</x-button>
+            <p class="decrypt-status" id="status" style="margin-top:12px"></p>
+        </form>
+    </div>
 @endsection
 
 @push('scripts')
     <script type="module">
         const form = document.getElementById('create-collection-form');
         const statusEl = document.getElementById('status');
-        const submitBtn = document.getElementById('submit-btn');
+        const submitBtn = form.querySelector('button[type=submit]');
         const workspaceId = '{{ $workspace->id }}';
 
         form.addEventListener('submit', async (e) => {
@@ -43,7 +42,7 @@
                 const { getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
                 const dekHandle = getWorkspaceDek(workspaceId);
-                if (!dekHandle) throw new Error('Workspace DEK not loaded. Please open the workspace first.');
+                if (!dekHandle) throw new Error('Workspace DEK not loaded.');
 
                 const { encryptedName, nameIv } = await encryptName(name, dekHandle);
 
