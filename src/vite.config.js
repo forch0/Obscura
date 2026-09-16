@@ -14,6 +14,8 @@ export default defineConfig({
                 'resources/js/crypto/dek.js',
                 'resources/js/crypto/workspace-session.js',
                 'resources/js/crypto/code-key.js',
+                'resources/js/crypto/media-encrypt.js',
+                'resources/js/crypto/media-decrypt.js',
             ],
             refresh: true,
         }),

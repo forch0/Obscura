@@ -35,6 +35,11 @@ class Gallery extends Model
         return $this->hasMany(GalleryMember::class);
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class);
+    }
+
     public function workspace()
     {
         return $this->collection->workspace;

@@ -760,8 +760,133 @@ From `docs/modules/04-collections-galleries.md` §9:
 
 ## Module 5 — Media Upload & Decrypt
 
-**Status:** ⬜ Not started
-**Depends on:** Module 4
+**Status:** ✅ Implemented
+**Started:** 2026-09-16
+**Completed:** 2026-09-16
+**Branch:** `features/module-5`
+**Tests:** 18 new (169 total, 372 assertions)
+
+---
+
+### 1. Database Layer
+
+| File | Status | Description |
+|---|---|---|
+| `database/migrations/2026_09_16_214152_create_media_table.php` | ✅ Created | UUID PK, `gallery_id` + `uploaded_by` FKs (cascade), `blob_path`, `thumb_path`, `cek_wrapped`, `iv`, `thumb_iv`, `mime_type`, `size`, `encrypted_title`/`title_iv`, `encrypted_caption`/`caption_iv`. |
+
+**Verification:**
+- `php artisan migrate:fresh` — ✅ All 12 migrations run cleanly
+
+---
+
+### 2. Models
+
+| File | Status | Description |
+|---|---|---|
+| `app/Models/Media.php` | ✅ Created | `UsesUuid`. `cek_wrapped` hidden from serialization. Relations: `gallery()`, `uploader()`. |
+| `app/Models/Gallery.php` | ✅ Modified | Added `media()` relation. |
+
+---
+
+### 3. Services
+
+| File | Status | Description |
+|---|---|---|
+| `app/Services/Storage/EncryptedBlobStorage.php` | ✅ Created | Path builder (`private/{ws}/{gallery}/{id}.enc`), `write()`, `read()`, `exists()`, `stream()` (StreamedResponse, octet-stream, no-store), `delete()`. Blobs outside web root. |
+
+---
+
+### 4. Policies
+
+| File | Status | Description |
+|---|---|---|
+| `app/Policies/MediaPolicy.php` | ✅ Created | `before()` — Super Admin explicitly **denied** (`false`, defense in depth — no DEK). `view` — delegates to `AuthorizationResolver::check('view')`. `create`/`update`/`delete` — delegate to `'upload'` ability. |
+
+---
+
+### 5. Controllers
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/MediaController.php` | ✅ Created | `index` — metadata only (no cek_wrapped/blob_path). `store` — accepts ciphertext + thumbnail files, writes to private disk, stores row. `show` — media viewer page. `update` — re-encrypt metadata only. `blob` — streams ciphertext with `X-Cek-Wrapped`/`X-Blob-Iv` headers. `thumbnail` — same for thumb. `destroy` — deletes files + row. Audit logs: `media.uploaded`, `media.renamed`, `media.deleted`. |
+
+---
+
+### 6. Routes
+
+| File | Status | Description |
+|---|---|---|
+| `routes/web.php` | ✅ Modified | 7 media routes: `POST/GET galleries/{gallery}/media`, `GET/PUT/DELETE media/{medium}`, `GET media/{medium}/blob`, `GET media/{medium}/thumbnail`. |
+
+---
+
+### 7. Views
+
+| File | Status | Description |
+|---|---|---|
+| `resources/views/galleries/show.blade.php` | ✅ Rewritten | Media grid with encrypted thumbnails, upload button + hidden file input, decrypt-and-render per item. |
+| `resources/views/media/show.blade.php` | ✅ Created | Full-size view: decrypt title/caption, fetch blob, decrypt, render. |
+
+---
+
+### 8. JS Crypto Modules
+
+| File | Status | Description |
+|---|---|---|
+| `resources/js/crypto/media-encrypt.js` | ✅ Created | `encryptFile()` — per-file CEK, AES-GCM encrypt, CEK wrapped with DEK (IV prepended), encrypted JPEG thumbnail via OffscreenCanvas, title/caption encrypted with DEK. `encryptTextField()`, `decryptTextField()`. |
+| `resources/js/crypto/media-decrypt.js` | ✅ Created | `fetchAndDecryptMedia()` — fetch blob, read X-Cek-Wrapped/X-Blob-Iv headers, unwrap CEK, decrypt, return object URL. `decryptBlob()` — unwrap + decrypt. |
+| `vite.config.js` | ✅ Modified | Added media-encrypt.js + media-decrypt.js entries. |
+
+**Bundle sizes:** media-encrypt 2.99 KB, media-decrypt ~1 KB — within budget.
+
+---
+
+### 9. Factories
+
+| File | Status | Description |
+|---|---|---|
+| `database/factories/MediaFactory.php` | ✅ Created | `gallery_id`, `uploaded_by`, random blob paths, cek_wrapped, IVs, mime_type, size. `withThumbnail()` state. |
+
+---
+
+### 10. Tests
+
+| File | Status | Tests | Description |
+|---|---|---|---|
+| `tests/Feature/Media/MediaTest.php` | ✅ Created | 12 | Upload, ciphertext-only storage, audit, Super Admin 403 on upload + blob, joint editor upload, viewer 403, delete (files + row), index metadata only, blob streaming + headers, 404 on missing file, rename. |
+| `tests/Unit/Services/EncryptedBlobStorageTest.php` | ✅ Created | 6 | Path format, write/read, delete, null-safe delete, private dir prefix. |
+
+**Module 5 total: 18 tests**
+**Project total: 169 tests, 372 assertions — all passing ✅**
+
+---
+
+### 11. Acceptance Criteria Checklist
+
+From `docs/modules/05-media-encrypt.md` §10:
+
+- [x] Authorized user can upload an image; encrypted client-side before upload
+- [x] Server stores only ciphertext + sealed CEK + IV
+- [x] Gallery grid renders using plaintext metadata
+- [x] Media title and caption encrypted at rest with workspace DEK
+- [x] Server never sees plaintext title or caption
+- [x] Gallery grid decrypts titles/captions client-side
+- [x] Thumbnails generated client-side, encrypted, served via authz-gated endpoint
+- [x] Full image streamed as ciphertext, decrypted in-browser
+- [x] Owner can delete any media in their workspace
+- [x] Joint-gallery editor can upload/delete/rename
+- [x] Shared-gallery viewer can view but not upload/delete
+- [x] Access code with upload permission can upload (via AuthorizationResolver)
+- [x] Access code with view-only cannot upload
+- [x] Super Admin cannot view media (403 — `before()` returns false)
+- [x] Blobs stored outside web root (`storage/app/private/`)
+- [x] Plaintext image content never in any request, response, log, or DB row
+- [x] All tests pass (169 tests, 372 assertions)
+- [ ] JS crypto round-trip tests (deferred — requires browser/Vitest)
+
+---
+
+## Module 6 — Re-key on Revoke
 
 ---
 

@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\GalleryMemberController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
@@ -82,4 +83,13 @@ Route::middleware(['auth', 'keypair'])->group(function () {
         Route::put('galleries/{gallery}/members/{member}', [GalleryMemberController::class, 'update'])->name('galleries.members.update');
         Route::delete('galleries/{gallery}/members/{member}', [GalleryMemberController::class, 'destroy'])->name('galleries.members.destroy');
     });
+
+    // Media (nested under galleries for create/list; direct for blob/update/delete)
+    Route::post('galleries/{gallery}/media', [MediaController::class, 'store'])->name('media.store');
+    Route::get('galleries/{gallery}/media', [MediaController::class, 'index'])->name('media.index');
+    Route::get('media/{medium}', [MediaController::class, 'show'])->name('media.show');
+    Route::put('media/{medium}', [MediaController::class, 'update'])->name('media.update');
+    Route::delete('media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
+    Route::get('media/{medium}/blob', [MediaController::class, 'blob'])->name('media.blob');
+    Route::get('media/{medium}/thumbnail', [MediaController::class, 'thumbnail'])->name('media.thumbnail');
 });
