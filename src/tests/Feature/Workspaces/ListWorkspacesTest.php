@@ -19,7 +19,7 @@ class ListWorkspacesTest extends TestCase
         $response = $this->actingAs($user)->get(route('workspaces.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Your Workspaces');
+        $response->assertSee('Workspaces');
     }
 
     public function test_owner_does_not_see_others_workspaces(): void

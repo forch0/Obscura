@@ -4,19 +4,16 @@
 
 @section('content')
     <div class="page-header">
-        <h2>Your Workspaces</h2>
-        <a href="{{ route('workspaces.create') }}" class="btn-primary">New Workspace</a>
+        <h2>Workspaces</h2>
+        <x-button variant="primary" size="md" pill href="{{ route('workspaces.create') }}">New Workspace</x-button>
     </div>
 
-    <div id="workspace-list">
-        <div class="decrypt-status"><span class="spinner"></span> Decrypting workspace names…</div>
+    <div id="workspaces-list">
+        <div class="decrypt-status"><span class="spinner"></span> Decrypting…</div>
     </div>
 
     @if ($workspaces->isEmpty())
-        <div class="empty-state">
-            <h3>No workspaces yet</h3>
-            <p>Create your first encrypted workspace to get started.</p>
-        </div>
+        <x-empty-state title="No workspaces yet" message="Create your first encrypted workspace to get started." :action="route('workspaces.create')" action-label="Create Workspace" />
     @endif
 @endsection
 
@@ -27,51 +24,52 @@
     <script type="module">
         const workspaces = @json($wsData);
 
-        if (workspaces.length === 0) {
-            document.getElementById('workspace-list').innerHTML = '';
-        } else {
-            (async () => {
-                const { unsealDek, decryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
-                const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
-                const { setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
+        (async () => {
+            const { unsealDek, decryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+            const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+            const { setWorkspaceDek, hasWorkspaceDek, getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const privateKeyHandle = getPrivateKeyHandle();
-                if (!privateKeyHandle) {
-                    document.getElementById('workspace-list').innerHTML =
-                        '<p class="decrypt-status">Private key not loaded. Please log in again.</p>';
-                    return;
-                }
+            const privateKeyHandle = getPrivateKeyHandle();
+            if (!privateKeyHandle) {
+                document.getElementById('workspaces-list').innerHTML = '<p class="decrypt-status">Private key not loaded. Please log in again.</p>';
+                return;
+            }
 
-                const grid = document.createElement('div');
-                grid.className = 'workspace-grid';
+            const grid = document.createElement('div');
+            grid.className = 'gallery-grid';
 
-                for (const ws of workspaces) {
-                    try {
-                        const dekHandle = await unsealDek(ws.wrapped_dek_for_owner, privateKeyHandle);
+            for (const ws of workspaces) {
+                try {
+                    let dekHandle;
+                    if (hasWorkspaceDek(ws.id)) {
+                        dekHandle = getWorkspaceDek(ws.id);
+                    } else {
+                        dekHandle = await unsealDek(ws.wrapped_dek_for_owner, privateKeyHandle);
                         setWorkspaceDek(ws.id, dekHandle);
-                        const name = await decryptName(ws.encrypted_name, dekHandle, ws.name_iv);
-
-                        const card = document.createElement('div');
-                        card.className = 'workspace-card';
-                        card.innerHTML = `
-                            <h3>${name}</h3>
-                            <p>DEK version ${ws.dek_version ?? 1}</p>
-                            <div class="actions">
-                                <a href="/workspaces/${ws.id}" class="btn-secondary">Open</a>
-                            </div>
-                        `;
-                        grid.appendChild(card);
-                    } catch (e) {
-                        const card = document.createElement('div');
-                        card.className = 'workspace-card';
-                        card.innerHTML = `<h3>(decryption failed)</h3><p>${e.message}</p>`;
-                        grid.appendChild(card);
                     }
-                }
 
-                document.getElementById('workspace-list').innerHTML = '';
-                document.getElementById('workspace-list').appendChild(grid);
-            })();
-        }
+                    const name = await decryptName(ws.encrypted_name, dekHandle, ws.name_iv);
+
+                    const card = document.createElement('a');
+                    card.href = `/workspaces/${ws.id}`;
+                    card.className = 'card';
+                    card.style.textDecoration = 'none';
+                    card.style.color = 'var(--text)';
+                    card.innerHTML = `
+                        <h3>${name}</h3>
+                        <p class="text-caption text-secondary" style="margin-top:4px">Encrypted workspace</p>
+                    `;
+                    grid.appendChild(card);
+                } catch (e) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `<h3>(decryption failed)</h3><p class="error-text">${e.message}</p>`;
+                    grid.appendChild(card);
+                }
+            }
+
+            document.getElementById('workspaces-list').innerHTML = '';
+            document.getElementById('workspaces-list').appendChild(grid);
+        })();
     </script>
 @endpush

@@ -5,21 +5,38 @@
 @section('content')
     <div class="page-header">
         <h2 id="workspace-name"><span class="spinner"></span> Decrypting…</h2>
-        <div>
-            <a href="{{ route('workspaces.edit', $workspace) }}" class="btn-secondary">Rename</a>
+        <div class="flex gap-2">
+            <x-button variant="secondary" href="{{ route('collections.index', $workspace) }}">Collections</x-button>
+            <x-button variant="secondary" href="{{ route('access-codes.index', $workspace) }}">Codes</x-button>
+            <x-button variant="secondary" href="{{ route('workspaces.edit', $workspace) }}">Rename</x-button>
+            <x-button variant="secondary" href="{{ route('workspaces.rekey', $workspace) }}">Re-key</x-button>
             <form method="POST" action="{{ route('workspaces.destroy', $workspace) }}" style="display:inline" onsubmit="return confirm('Delete this workspace? All collections and galleries will be permanently lost.')">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn-danger">Delete</button>
+                <x-button type="submit" variant="danger">Delete</x-button>
             </form>
         </div>
     </div>
 
     <div id="workspace-content">
-        <p class="decrypt-status">DEK version: {{ $workspace->dek_version }}</p>
-        @if ($workspace->rekeyed_at)
-            <p class="decrypt-status">Last re-keyed: {{ $workspace->rekeyed_at->format('M j, Y g:i A') }}</p>
-        @endif
+        <div class="card">
+            <div class="flex items-center gap-4" style="flex-wrap:wrap">
+                <div>
+                    <p class="text-caption text-muted">DEK Version</p>
+                    <p class="font-semibold">{{ $workspace->dek_version }}</p>
+                </div>
+                @if ($workspace->rekeyed_at)
+                    <div>
+                        <p class="text-caption text-muted">Last Re-keyed</p>
+                        <p class="font-medium">{{ $workspace->rekeyed_at->format('M j, Y g:i A') }}</p>
+                    </div>
+                @endif
+                <div>
+                    <p class="text-caption text-muted">Collections</p>
+                    <p class="font-semibold">{{ $workspace->collections->count() }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 

@@ -5,30 +5,29 @@
 @section('content')
     <div class="page-header">
         <h2>New Workspace</h2>
-        <a href="{{ route('workspaces.index') }}" class="btn-secondary">Cancel</a>
+        <x-button variant="secondary" href="{{ route('workspaces.index') }}">Cancel</x-button>
     </div>
 
-    <form id="create-workspace-form" style="max-width:480px">
-        @csrf
-        <div class="form-group">
-            <label for="name">Workspace Name</label>
-            <input type="text" id="name" class="form-input" placeholder="My Private Gallery" required>
-        </div>
-        <button type="submit" class="btn-primary" id="submit-btn">Create Workspace</button>
-        <p class="decrypt-status" id="status"></p>
-    </form>
+    <div class="card" style="max-width:480px">
+        <form id="create-workspace-form">
+            @csrf
+            <x-input label="Workspace Name" name="name" placeholder="My Gallery" required />
+            <x-button type="submit" variant="primary" size="lg" pill class="w-full">Create Workspace</x-button>
+            <p class="decrypt-status" id="status" style="margin-top:12px"></p>
+        </form>
+    </div>
 @endsection
 
 @push('scripts')
     <script type="module">
         const form = document.getElementById('create-workspace-form');
         const statusEl = document.getElementById('status');
-        const submitBtn = document.getElementById('submit-btn');
+        const submitBtn = form.querySelector('button[type=submit]');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitBtn.disabled = true;
-            statusEl.innerHTML = '<span class="spinner"></span> Generating encryption key…';
+            statusEl.innerHTML = '<span class="spinner"></span> Generating DEK…';
 
             try {
                 const name = document.getElementById('name').value;
@@ -37,43 +36,33 @@
                 const { setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
                 const privateKeyHandle = getPrivateKeyHandle();
-                if (!privateKeyHandle) {
-                    throw new Error('Private key not loaded. Please log in again.');
-                }
+                const publicKeyB64 = document.querySelector('meta[name=user-public-key]').content;
+                if (!privateKeyHandle || !publicKeyB64) throw new Error('Keypair not loaded.');
 
-                // Fetch owner's public key from the user model (passed via meta)
-                const publicKeyB64 = document.querySelector('meta[name="user-public-key"]').content;
-
-                statusEl.innerHTML = '<span class="spinner"></span> Sealing DEK…';
-                const { wrappedDek, dekHandle } = await generateAndSealDek(publicKeyB64);
-
-                statusEl.innerHTML = '<span class="spinner"></span> Encrypting workspace name…';
+                const { dekHandle, wrappedDek, wrappedDekIv } = await generateAndSealDek(publicKeyB64);
                 const { encryptedName, nameIv } = await encryptName(name, dekHandle);
 
-                statusEl.innerHTML = '<span class="spinner"></span> Creating workspace…';
-
-                const response = await fetch('{{ route("workspaces.store") }}', {
+                const response = await fetch('/workspaces', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
                         encrypted_name: encryptedName,
                         name_iv: nameIv,
                         wrapped_dek: wrappedDek,
-                        wrapped_dek_iv: '',
+                        wrapped_dek_iv: wrappedDekIv,
                     }),
                 });
 
                 if (response.ok) {
                     const data = await response.json();
                     setWorkspaceDek(data.workspace_id, dekHandle);
-                    window.location.href = '/workspaces/' + data.workspace_id;
+                    window.location.href = `/workspaces/${data.workspace_id}`;
                 } else {
-                    const err = await response.json();
-                    throw new Error(err.message || 'Failed to create workspace');
+                    throw new Error('Failed to create workspace');
                 }
             } catch (e) {
                 statusEl.textContent = 'Error: ' + e.message;
