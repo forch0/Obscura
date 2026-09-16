@@ -55,8 +55,43 @@
         }
 
         @media (max-width: 720px) {
-            .public-nav .links a:not(.btn):not(.nav-primary) { display: none; }
+            .public-nav .links a:not(.btn) { display: none; }
             .public-nav { padding: 0 16px; }
+        }
+
+        /* Mobile menu */
+        .menu-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px; height: 36px;
+            background: none;
+            border: 1px solid hsl(var(--border));
+            border-radius: 6px;
+            cursor: pointer;
+            color: hsl(var(--foreground));
+        }
+        .menu-toggle svg { width: 18px; height: 18px; }
+
+        .mobile-menu {
+            display: none;
+            border-bottom: 1px solid hsl(var(--border));
+            background: hsl(var(--background));
+            padding: 8px 16px 16px;
+        }
+        .mobile-menu.open { display: block; }
+        .mobile-menu a {
+            display: block;
+            padding: 10px 8px;
+            font-size: 0.9375rem;
+            color: hsl(var(--foreground));
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .mobile-menu a:hover { background: hsl(var(--muted)); }
+
+        @media (max-width: 720px) {
+            .menu-toggle { display: flex; }
         }
 
         .public-footer {
@@ -89,8 +124,23 @@
                 <a href="{{ route('login') }}" class="nav-primary">Sign In</a>
                 <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Get Started</a>
             @endauth
+            <button class="menu-toggle" id="menu-toggle" aria-label="Menu" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+                </svg>
+            </button>
         </div>
     </nav>
+
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="{{ route('about') }}">About</a>
+        <a href="{{ route('architecture') }}">Architecture</a>
+        <a href="{{ route('use-cases') }}">Use Cases</a>
+        <a href="{{ route('enter') }}">Enter Code</a>
+        @guest
+            <a href="{{ route('login') }}">Sign In</a>
+        @endguest
+    </div>
 
     @yield('content')
 
@@ -103,5 +153,14 @@
             <a href="{{ route('enter') }}">Enter Code</a>
         </p>
     </footer>
+
+    <script>
+        const toggle = document.getElementById('menu-toggle');
+        const menu = document.getElementById('mobile-menu');
+        toggle?.addEventListener('click', () => {
+            const open = menu.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open);
+        });
+    </script>
 </body>
 </html>
