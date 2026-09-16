@@ -35,12 +35,12 @@
 
         (async () => {
             const { unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
-            const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+            const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
             const { hasWorkspaceDek, getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
             const { fetchAndDecryptMedia } = await import('{{ Vite::asset("resources/js/crypto/media-decrypt.js") }}');
             const { decryptTextField } = await import('{{ Vite::asset("resources/js/crypto/media-encrypt.js") }}');
 
-            const privateKeyHandle = getPrivateKeyHandle();
+            const privateKeyHandle = await restorePrivateKey();
             if (!privateKeyHandle) {
                 document.getElementById('media-title').textContent = 'Private key not loaded';
                 return;

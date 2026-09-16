@@ -32,10 +32,10 @@
             try {
                 const name = document.getElementById('name').value;
                 const { generateAndSealDek, encryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
-                const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+                const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
                 const { setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const privateKeyHandle = getPrivateKeyHandle();
+                const privateKeyHandle = await restorePrivateKey();
                 const publicKeyB64 = document.querySelector('meta[name=user-public-key]').content;
                 if (!privateKeyHandle || !publicKeyB64) throw new Error('Keypair not loaded.');
 

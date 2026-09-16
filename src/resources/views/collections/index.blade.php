@@ -29,10 +29,10 @@
 
         (async () => {
             const { unsealDek, decryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
-            const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+            const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
             const { setWorkspaceDek, hasWorkspaceDek, getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-            const privateKeyHandle = getPrivateKeyHandle();
+            const privateKeyHandle = await restorePrivateKey();
             if (!privateKeyHandle) {
                 document.getElementById('collections-list').innerHTML = '<p class="decrypt-status">Private key not loaded.</p>';
                 return;

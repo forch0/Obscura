@@ -71,7 +71,7 @@ document.getElementById('recover-step1').addEventListener('submit', async functi
         const { encrypted_private_key_recovery, recovery_code_salt } = await verifyRes.json();
 
         // Step 2: Unseal private key with recovery code (browser-side)
-        const { unsealPrivateKeyWithRecoveryCode, sealPrivateKeyWithPassword } = await import('{{ asset("js/crypto/recovery.js") }}');
+        const { unsealPrivateKeyWithRecoveryCode, sealPrivateKeyWithPassword } = await import('{{ Vite::asset("resources/js/crypto/recovery.js") }}');
 
         const [sealedB64, iv] = encrypted_private_key_recovery.split(':');
         const privPkcs8 = await unsealPrivateKeyWithRecoveryCode(recoveryCode, sealedB64, recovery_code_salt, iv);

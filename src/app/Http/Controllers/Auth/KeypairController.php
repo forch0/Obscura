@@ -9,6 +9,25 @@ use Illuminate\Http\Request;
 
 class KeypairController extends Controller
 {
+    public function show(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->hasKeypair()) {
+            return response()->json(['error' => 'No keypair.'], 404);
+        }
+
+        // encrypted_private_key is stored as "sealed:iv"
+        [$sealed, $iv] = explode(':', $user->encrypted_private_key);
+
+        return response()->json([
+            'encrypted_private_key' => $sealed,
+            'keypair_iv' => $iv,
+            'keypair_salt' => $user->keypair_salt,
+            'public_key' => $user->public_key,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

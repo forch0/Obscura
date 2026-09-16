@@ -65,7 +65,7 @@
 
                 statusEl.innerHTML = '<span class="spinner"></span> Generating new DEK…';
                 const { startRekey } = await import('{{ Vite::asset("resources/js/crypto/rekey.js") }}');
-                const { getPrivateKeyHandle } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+                const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
                 const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
                 const oldDek = getWorkspaceDek(workspaceId);

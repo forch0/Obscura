@@ -124,6 +124,9 @@ document.getElementById('keygen-form').addEventListener('submit', async function
 
         sessionStorage.setItem('recovery_code', recoveryCode);
 
+        const { storePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+        await storePrivateKey(result.privateKeyHandle);
+
         loading.classList.remove('active');
         doneEl.classList.add('active');
     } catch (err) {

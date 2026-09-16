@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/keygen', fn () => view('auth.keygen'))->name('keygen');
     Route::post('/api/keypair', [KeypairController::class, 'store'])->name('keypair.store');
+    Route::get('/api/keypair', [KeypairController::class, 'show'])->name('keypair.show');
     Route::get('/recovery-code', [RecoveryCodeController::class, 'show'])->name('recovery-code');
 
     // Email verification
