@@ -42,7 +42,10 @@
 
 @push('scripts')
     @php
-        $wsData = $workspace->only(['id', 'encrypted_name', 'name_iv', 'wrapped_dek_for_owner', 'wrapped_dek_iv']);
+        $wsData = array_merge(
+            $workspace->only(['id', 'encrypted_name', 'name_iv']),
+            ['wrapped_dek' => $workspace->wrappedDekFor(auth()->user())]
+        );
     @endphp
     <script type="module">
         const workspace = @json($wsData);
@@ -62,7 +65,7 @@
             if (hasWorkspaceDek(workspace.id)) {
                 dekHandle = getWorkspaceDek(workspace.id);
             } else {
-                dekHandle = await unsealDek(workspace.wrapped_dek_for_owner, privateKeyHandle);
+                dekHandle = await unsealDek(workspace.wrapped_dek, privateKeyHandle);
                 setWorkspaceDek(workspace.id, dekHandle);
             }
 

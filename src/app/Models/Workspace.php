@@ -59,4 +59,17 @@ class Workspace extends Model
     {
         return $this->hasMany(AuditLog::class, 'subject_id')->where('subject_type', self::class);
     }
+
+    /**
+     * Get the wrapped DEK sealed to the given user's public key.
+     * Owner → wrapped_dek_for_owner; member → workspace_members.wrapped_dek.
+     */
+    public function wrappedDekFor(User $user): ?string
+    {
+        if ($this->owner_id === $user->id) {
+            return $this->wrapped_dek_for_owner;
+        }
+
+        return $this->members()->where('user_id', $user->id)->value('wrapped_dek');
+    }
 }

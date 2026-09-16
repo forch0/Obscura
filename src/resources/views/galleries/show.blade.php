@@ -31,7 +31,10 @@
 
 @push('scripts')
     @php
-        $wsData = $workspace->only(['id', 'wrapped_dek_for_owner']);
+        $wsData = [
+            'id' => $workspace->id,
+            'wrapped_dek' => $workspace->wrappedDekFor(auth()->user()),
+        ];
         $galData = $gallery->only(['id', 'encrypted_name', 'name_iv', 'type', 'encrypted_description', 'description_iv']);
         $collData = $collection->only(['id']);
     @endphp
@@ -76,7 +79,7 @@
 
             dekHandle = hasWorkspaceDek(workspaceId)
                 ? getWorkspaceDek(workspaceId)
-                : await unsealDek(workspace.wrapped_dek_for_owner, privateKeyHandle);
+                : await unsealDek(workspace.wrapped_dek, privateKeyHandle);
 
             const name = await decryptName(gallery.encrypted_name, dekHandle, gallery.name_iv);
             document.getElementById('gallery-name').textContent = name;

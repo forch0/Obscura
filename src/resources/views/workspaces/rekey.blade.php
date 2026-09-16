@@ -65,11 +65,18 @@
 
                 statusEl.innerHTML = '<span class="spinner"></span> Generating new DEK…';
                 const { startRekey } = await import('{{ Vite::asset("resources/js/crypto/rekey.js") }}');
+                const { unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
                 const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
                 const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const oldDek = getWorkspaceDek(workspaceId);
-                if (!oldDek) throw new Error('Workspace DEK not loaded.');
+                const privateKeyHandle = await restorePrivateKey();
+                if (!privateKeyHandle) throw new Error('Private key not loaded.');
+
+                let oldDek = getWorkspaceDek(workspaceId);
+                if (!oldDek) {
+                    oldDek = await unsealDek(@json($workspace->wrappedDekFor(auth()->user())), privateKeyHandle);
+                    setWorkspaceDek(workspaceId, oldDek);
+                }
 
                 const result = await startRekey(oldDek, data);
 

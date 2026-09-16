@@ -84,10 +84,18 @@
 
                 statusEl.innerHTML = '<span class="spinner"></span> Sealing DEK…';
                 const { sealDekForCode } = await import('{{ Vite::asset("resources/js/crypto/code-key.js") }}');
-                const { getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
+                const { unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+                const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+                const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const dekHandle = getWorkspaceDek(workspaceId);
-                if (!dekHandle) throw new Error('Workspace DEK not loaded.');
+                const privateKeyHandle = await restorePrivateKey();
+                if (!privateKeyHandle) throw new Error('Private key not loaded.');
+
+                let dekHandle = getWorkspaceDek(workspaceId);
+                if (!dekHandle) {
+                    dekHandle = await unsealDek(@json($workspace->wrappedDekFor(auth()->user())), privateKeyHandle);
+                    setWorkspaceDek(workspaceId, dekHandle);
+                }
 
                 const wrappedDek = await sealDekForCode(dekHandle, raw_code, code_salt);
 

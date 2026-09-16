@@ -19,7 +19,10 @@
 
 @push('scripts')
     @php
-        $wsData = $workspace->only(['id', 'wrapped_dek_for_owner', 'encrypted_name', 'name_iv']);
+        $wsData = array_merge(
+            $workspace->only(['id', 'encrypted_name', 'name_iv']),
+            ['wrapped_dek' => $workspace->wrappedDekFor(auth()->user())]
+        );
         $collectionsData = $collections->map(fn($c) => $c->only(['id', 'encrypted_name', 'name_iv', 'encrypted_description', 'description_iv']));
     @endphp
     <script type="module">
@@ -42,7 +45,7 @@
             if (hasWorkspaceDek(workspaceId)) {
                 dekHandle = getWorkspaceDek(workspaceId);
             } else {
-                dekHandle = await unsealDek(workspace.wrapped_dek_for_owner, privateKeyHandle);
+                dekHandle = await unsealDek(workspace.wrapped_dek, privateKeyHandle);
                 setWorkspaceDek(workspaceId, dekHandle);
             }
 

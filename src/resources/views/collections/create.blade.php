@@ -38,11 +38,18 @@
                 const name = document.getElementById('name').value;
                 const description = document.getElementById('description').value;
 
-                const { encryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
-                const { getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
+                const { encryptName, unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+                const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+                const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const dekHandle = getWorkspaceDek(workspaceId);
-                if (!dekHandle) throw new Error('Workspace DEK not loaded.');
+                const privateKeyHandle = await restorePrivateKey();
+                if (!privateKeyHandle) throw new Error('Private key not loaded.');
+
+                let dekHandle = getWorkspaceDek(workspaceId);
+                if (!dekHandle) {
+                    dekHandle = await unsealDek(@json($workspace->wrappedDekFor(auth()->user())), privateKeyHandle);
+                    setWorkspaceDek(workspaceId, dekHandle);
+                }
 
                 const { encryptedName, nameIv } = await encryptName(name, dekHandle);
 

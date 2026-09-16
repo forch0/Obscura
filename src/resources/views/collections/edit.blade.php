@@ -24,7 +24,10 @@
 
 @push('scripts')
     @php
-        $wsData = $workspace->only(['id', 'wrapped_dek_for_owner']);
+        $wsData = [
+            'id' => $workspace->id,
+            'wrapped_dek' => $workspace->wrappedDekFor(auth()->user()),
+        ];
         $collData = $collection->only(['id', 'encrypted_name', 'name_iv', 'encrypted_description', 'description_iv']);
     @endphp
     <script type="module">
@@ -45,7 +48,7 @@
             if (!privateKeyHandle) { statusEl.textContent = 'Private key not loaded.'; return; }
 
             const dekHandle = getWorkspaceDek(workspace.id)
-                || await unsealDek(workspace.wrapped_dek_for_owner, privateKeyHandle);
+                || await unsealDek(workspace.wrapped_dek, privateKeyHandle);
 
             try {
                 nameInput.value = await decryptName(collection.encrypted_name, dekHandle, collection.name_iv);

@@ -25,7 +25,10 @@
 @push('scripts')
     @php
         $mediaData = $media->only(['id', 'encrypted_title', 'title_iv', 'encrypted_caption', 'caption_iv', 'mime_type']);
-        $wsData = $workspace->only(['id', 'wrapped_dek_for_owner']);
+        $wsData = [
+            'id' => $workspace->id,
+            'wrapped_dek' => $workspace->wrappedDekFor(auth()->user()),
+        ];
     @endphp
     <script type="module">
         const media = @json($mediaData);
@@ -48,7 +51,7 @@
 
             const dekHandle = hasWorkspaceDek(workspaceId)
                 ? getWorkspaceDek(workspaceId)
-                : await unsealDek(workspace.wrapped_dek_for_owner, privateKeyHandle);
+                : await unsealDek(workspace.wrapped_dek, privateKeyHandle);
 
             try {
                 if (media.encrypted_title) {
