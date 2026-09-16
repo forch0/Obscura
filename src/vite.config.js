@@ -11,6 +11,8 @@ export default defineConfig({
                 'resources/js/crypto/pbkdf2.js',
                 'resources/js/crypto/session.js',
                 'resources/js/crypto/recovery.js',
+                'resources/js/crypto/dek.js',
+                'resources/js/crypto/workspace-session.js',
             ],
             refresh: true,
         }),
