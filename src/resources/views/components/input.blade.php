@@ -6,7 +6,12 @@
     'required' => false,
     'error' => null,
     'helper' => null,
+    'value' => null,
 ])
+
+@php
+    $errorMessage = $error ?? ($name ? $errors->first($name) : null);
+@endphp
 
 <div class="form-group">
     @if($label)
@@ -16,13 +21,14 @@
         type="{{ $type }}"
         id="{{ $name }}"
         name="{{ $name }}"
-        class="form-input"
+        class="form-input {{ $errorMessage ? 'is-invalid' : '' }}"
         placeholder="{{ $placeholder }}"
+        @if($value !== null) value="{{ $value }}" @endif
         @if($required) required @endif
         {{ $attributes }}
     >
-    @if($error)
-        <p class="error-text">{{ $error }}</p>
+    @if($errorMessage)
+        <p class="error-text">{{ $errorMessage }}</p>
     @elseif($helper)
         <p class="text-caption text-muted" style="margin-top:4px">{{ $helper }}</p>
     @endif

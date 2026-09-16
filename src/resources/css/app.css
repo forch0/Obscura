@@ -392,6 +392,14 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
     color: hsl(var(--muted-foreground));
 }
 
+.form-input.is-invalid {
+    border-color: hsl(var(--destructive));
+}
+
+.form-input.is-invalid:focus {
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--destructive));
+}
+
 textarea.form-input {
     height: auto;
     padding: 10px 12px;
