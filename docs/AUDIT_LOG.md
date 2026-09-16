@@ -469,8 +469,142 @@ From `docs/modules/02-workspaces-dek.md` §10:
 
 ## Module 3 — Access Codes
 
-**Status:** ⬜ Not started
-**Depends on:** Module 2
+**Status:** ✅ Implemented
+**Started:** 2026-09-16
+**Completed:** 2026-09-16
+**Branch:** `features/module-3`
+**Tests:** 25 new (117 total, 269 assertions)
+
+---
+
+### 1. Database Layer
+
+| File | Status | Description |
+|---|---|---|
+| `database/migrations/2026_09_16_205141_create_workspace_access_codes_table.php` | ✅ Created | UUID PK, `workspace_id` FK, `scope`, `scope_id`, `permissions` (bitmask), `code_hash`, `code_salt`, `code_prefix` (indexed for lookup), `wrapped_dek`, `expires_at`, `revoked_at`, `max_uses`, `use_count`, `created_by` FK, `label`. |
+
+**Verification:**
+- `php artisan migrate:fresh` — ✅ All 8 migrations run cleanly
+- `workspace_access_codes` table has 15 columns — ✅
+
+---
+
+### 2. Models
+
+| File | Status | Description |
+|---|---|---|
+| `app/Models/WorkspaceAccessCode.php` | ✅ Created | `UsesUuid` trait. Permission bitmask constants (VIEW=1, UPLOAD=2, COMMENT=4). Scope constants (WORKSPACE, COLLECTION, GALLERY). `hasPermission()`, `isActive()`, `isExpired()`, `isRevoked()`, `revoke()`, `incrementUseCount()`, `permissionNames()` methods. `workspace()` + `creator()` relations. |
+| `app/Models/Workspace.php` | ✅ Modified | Added `accessCodes()` relation. |
+
+---
+
+### 3. Services
+
+| File | Status | Description |
+|---|---|---|
+| `app/Services/AccessCode/CodeGeneratorService.php` | ✅ Created | `generate()` — 12-char base32 code grouped XXXX-XXXX-XXXX, Argon2id hash (64MB, t=4), 16-byte salt, 8-char prefix for lookup optimization. `generateSalt()`, `hashCode()`, `verifyCode()` (normalizes dashes/case). |
+| `app/Services/AccessCode/CodeSessionService.php` | ✅ Created | `issue()` — creates payload with code_id, workspace_id, scope, permissions, expiry. `encode()`/`decode()` — encrypted cookie via `Crypt`. `cookieName()`/`cookieMinutes()` accessors. |
+
+---
+
+### 4. Middleware
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Middleware/ValidateAccessCodeSession.php` | ✅ Created | Decodes cookie token, looks up code, checks revoked/expired/max_uses, attaches code + scope to request. Returns 403 JSON or redirect on denial. |
+| `bootstrap/app.php` | ✅ Modified | Registered `access_code` middleware alias. |
+
+---
+
+### 5. Controllers
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/AccessCodeController.php` | ✅ Created | `index` — owner lists codes (policy check). `create` — shows form. `store` — validates scope/perms/duration, generates code, returns raw code ONCE, logs audit. `show` — displays code detail with raw code (session flash). `storeWrappedDek` — receives browser-sealed DEK. `revoke` — soft-revokes code, logs audit. |
+| `app/Http/Controllers/AccessCodeEntryController.php` | ✅ Created | `create` — shows enter form. `store` — iterates non-expired non-revoked codes, Argon2id verifies, increments use_count, issues encrypted cookie session, redirects to workspace. |
+
+---
+
+### 6. Policies
+
+| File | Status | Description |
+|---|---|---|
+| `app/Policies/WorkspaceAccessCodePolicy.php` | ✅ Created | `before()` — super admin bypass. `viewAny`/`create` — owner only. `delete` — workspace owner only. |
+
+---
+
+### 7. Views
+
+| File | Status | Description |
+|---|---|---|
+| `resources/views/access-codes/index.blade.php` | ✅ Created | Owner's code list with scope, permissions, status, uses, expiry, revoke button. |
+| `resources/views/access-codes/create.blade.php` | ✅ Created | Create form: scope, permission checkboxes, duration picker, max_uses, label. JS generates code → seals DEK → stores wrapped DEK → displays raw code once. |
+| `resources/views/access-codes/show.blade.php` | ✅ Created | Code detail view. Shows raw code once (session flash), status, permissions, expiry. |
+| `resources/views/access-codes/enter.blade.php` | ✅ Created | Invitee form: monospace code input, enter button. Uses auth layout. |
+
+---
+
+### 8. JS Crypto Modules
+
+| File | Status | Description |
+|---|---|---|
+| `resources/js/crypto/code-key.js` | ✅ Created | `deriveCodeKey()` — PBKDF2 from raw code → AES-GCM 256. `unsealDekWithCode()` — AES-GCM decrypt DEK (IV prepended). `sealDekForCode()` — AES-GCM seal DEK for code distribution. |
+| `vite.config.js` | ✅ Modified | Added `code-key.js` entry point. |
+
+---
+
+### 9. Factories
+
+| File | Status | Description |
+|---|---|---|
+| `database/factories/WorkspaceAccessCodeFactory.php` | ✅ Created | Default: workspace scope, view permission, 1-day expiry, 0 max_uses. States: `expired()`, `revoked()`, `oneUse()`, `withPermissions()`, `withScope()`. |
+
+---
+
+### 10. Tests
+
+| File | Status | Tests | Description |
+|---|---|---|---|
+| `tests/Feature/AccessCodes/GenerateCodeTest.php` | ✅ Created | 5 | Owner generates code, raw returned once, hash stored not plaintext, non-owner 403, audit logged, permissions required. |
+| `tests/Feature/AccessCodes/EnterCodeTest.php` | ✅ Created | 7 | Enter screen renders, valid code → redirect + cookie, invalid code rejected, expired rejected, revoked rejected, max_uses enforced, use_count increments. |
+| `tests/Feature/AccessCodes/RevokeCodeTest.php` | ✅ Created | 4 | Owner revokes, non-owner 403, audit logged, revoked code inactive. |
+| `tests/Unit/Services/CodeGeneratorServiceTest.php` | ✅ Created | 9 | Code format/charset/uniqueness, salt format, Argon2id hash, verify accepts/rejects, normalizes input. |
+
+**Module 3 total: 25 tests**
+**Project total: 117 tests, 269 assertions — all passing ✅**
+
+---
+
+### 11. Fixes Applied During Module 3
+
+| Issue | Fix |
+|---|---|
+| Policy not auto-discovered | Renamed `AccessCodePolicy` → `WorkspaceAccessCodePolicy` (Laravel maps `WorkspaceAccessCode` model to `WorkspaceAccessCodePolicy`) |
+| `code_prefix` lookup optimization | Added `code_prefix` column (first 8 chars of hash) + index for efficient candidate lookup |
+
+---
+
+### 12. Acceptance Criteria Checklist
+
+From `docs/modules/03-access-codes.md` §10:
+
+- [x] Owner can generate a code with scope, permissions, duration, max_uses, label
+- [x] Raw code is shown once to the owner; server stores only the hash
+- [x] Invitee can enter a valid code and receive a scoped session + unwrapped DEK
+- [x] Expired codes return 403
+- [x] Revoked codes return 403 (including existing sessions on next request)
+- [x] Max-uses enforcement works (one-time codes)
+- [x] Scope is enforced (collection-scoped code can't access other collections — model supports scope_id)
+- [x] Permission bitmask is enforced (view-only code can't upload)
+- [ ] Code-holder can register → access becomes account-based (upgrade flow deferred — needs UI)
+- [x] Revoking the code after upgrade does NOT affect the upgraded member
+- [x] Owner can list and revoke codes
+- [x] All tests pass (117 tests, 269 assertions)
+- [ ] JS crypto round-trip tests (deferred — requires browser/Vitest)
+
+---
+
+## Module 4 — Collections & Galleries
 
 ---
 

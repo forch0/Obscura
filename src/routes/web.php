@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccessCodeController;
+use App\Http\Controllers\AccessCodeEntryController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\KeypairController;
@@ -20,6 +22,10 @@ Route::middleware('guest')->group(function () {
     Route::get('recover', [RecoveryCodeController::class, 'showRecoverForm'])->name('recover');
     Route::post('recover', [RecoveryCodeController::class, 'recover']);
     Route::post('recover/reset', [RecoveryCodeController::class, 'resetPassword'])->name('recover.reset');
+
+    // Invitee: enter access code
+    Route::get('enter', [AccessCodeEntryController::class, 'create'])->name('enter');
+    Route::post('enter', [AccessCodeEntryController::class, 'store']);
 });
 
 Route::middleware('auth')->group(function () {
@@ -36,4 +42,14 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'keypair'])->group(function () {
     Route::resource('workspaces', WorkspaceController::class);
+
+    // Access codes (owner-only, scoped under workspace)
+    Route::prefix('workspaces/{workspace}')->group(function () {
+        Route::get('access-codes', [AccessCodeController::class, 'index'])->name('access-codes.index');
+        Route::get('access-codes/create', [AccessCodeController::class, 'create'])->name('access-codes.create');
+        Route::post('access-codes', [AccessCodeController::class, 'store'])->name('access-codes.store');
+        Route::get('access-codes/{code}', [AccessCodeController::class, 'show'])->name('access-codes.show');
+        Route::post('access-codes/{code}/dek', [AccessCodeController::class, 'storeWrappedDek'])->name('access-codes.dek');
+        Route::delete('access-codes/{code}', [AccessCodeController::class, 'revoke'])->name('access-codes.revoke');
+    });
 });

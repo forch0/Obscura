@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/crypto/recovery.js',
                 'resources/js/crypto/dek.js',
                 'resources/js/crypto/workspace-session.js',
+                'resources/js/crypto/code-key.js',
             ],
             refresh: true,
         }),

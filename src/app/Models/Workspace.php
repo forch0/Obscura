@@ -45,6 +45,11 @@ class Workspace extends Model
         return $this->hasMany(WorkspaceMember::class);
     }
 
+    public function accessCodes(): HasMany
+    {
+        return $this->hasMany(WorkspaceAccessCode::class);
+    }
+
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class, 'subject_id')->where('subject_type', self::class);
