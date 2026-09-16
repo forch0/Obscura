@@ -1,7 +1,8 @@
 @extends('layouts.auth')
 
 @section('title', 'Recovery Code — Obscura')
-@section('subtitle', 'Save your recovery code')
+@section('card-title', 'Your recovery code')
+@section('card-subtitle', 'Save it somewhere safe — shown once')
 
 @section('extra-styles')
 <style>
@@ -11,37 +12,38 @@
         border-radius: 12px;
         padding: 24px;
         text-align: center;
-        margin: 24px 0;
+        margin: 20px 0;
     }
     .recovery-code-display code {
         font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         font-weight: 500;
         letter-spacing: 0.08em;
         color: hsl(var(--foreground));
         word-break: break-all;
     }
     .recovery-warning {
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-        color: #92400e;
+        background: hsl(var(--muted));
+        border: 1px solid hsl(var(--border));
+        border-left: 3px solid hsl(var(--foreground));
+        color: hsl(var(--foreground));
         padding: 12px 16px;
         border-radius: 8px;
         font-size: 0.8125rem;
-        margin-bottom: 20px;
-        line-height: 1.5;
+        margin-bottom: 16px;
+        line-height: 1.6;
     }
+    .recovery-warning strong { font-weight: 600; }
     .recovery-actions {
         display: flex;
         gap: 12px;
-        margin-top: 24px;
+        margin-top: 4px;
     }
-    .recovery-actions button { flex: 1; }
-    .recovery-actions .btn-primary { flex: 2; }
+    .recovery-actions > * { flex: 1; }
     .no-code {
         text-align: center;
         color: hsl(var(--muted-foreground));
-        padding: 40px 0;
+        padding: 24px 0;
     }
 </style>
 @endsection
@@ -59,9 +61,9 @@
         </div>
 
         <div class="recovery-actions">
-            <button class="btn-secondary" onclick="window.print()">Print</button>
-            <form method="GET" action="{{ route('home') }}" style="flex:2;">
-                <button type="submit" class="btn btn-primary btn-lg w-full">I've saved it — continue</button>
+            <button class="btn btn-secondary" onclick="window.print()">Print</button>
+            <form method="GET" action="{{ route('home') }}">
+                <button type="submit" class="btn btn-primary">I've saved it — continue</button>
             </form>
         </div>
     </div>
@@ -69,7 +71,7 @@
     <div id="no-code" class="no-code" style="display:none;">
         <p>No recovery code found. It may have already been displayed.</p>
         <div style="text-align:center;margin-top:20px;font-size:0.875rem">
-            <a href="{{ route('home') }}">Continue to home</a>
+            <a href="{{ route('home') }}" class="text-secondary" style="text-decoration:none">Continue to home</a>
         </div>
     </div>
 </div>

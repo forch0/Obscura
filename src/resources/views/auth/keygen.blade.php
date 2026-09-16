@@ -1,13 +1,14 @@
 @extends('layouts.auth')
 
 @section('title', 'Generating Keys — Obscura')
-@section('subtitle', 'Setting up your encryption keys')
+@section('card-title', 'Secure your account')
+@section('card-subtitle', 'Generate your encryption keys')
 
 @section('extra-styles')
 <style>
     .keygen-form { display: block; }
     .keygen-form.hidden { display: none; }
-    .keygen-status { text-align: center; padding: 20px 0; display: none; }
+    .keygen-status { text-align: center; padding: 24px 0; display: none; }
     .keygen-status.active { display: block; }
     .keygen-spinner {
         width: 40px; height: 40px;
@@ -23,14 +24,16 @@
     .keygen-done.active { display: block; }
     .keygen-error {
         display: none;
-        background: #fef2f2; border: 1px solid #fecaca;
-        color: hsl(var(--destructive)); padding: 12px 16px;
+        background: hsl(var(--destructive) / 0.08);
+        border: 1px solid hsl(var(--destructive) / 0.3);
+        color: hsl(var(--destructive));
+        padding: 12px 16px;
         border-radius: 8px; font-size: 0.875rem; margin-bottom: 20px;
     }
     .keygen-error.active { display: block; }
     .keygen-info {
         font-size: 0.8125rem; color: hsl(var(--muted-foreground));
-        line-height: 1.5; margin-bottom: 20px;
+        line-height: 1.6; margin-top: 4px; margin-bottom: 24px;
     }
 </style>
 @endsection
@@ -38,7 +41,7 @@
 @section('content')
 <div id="keygen-app">
     <p class="keygen-info">
-        We need your password to generate and seal your encryption keys.
+        We'll use your password to generate and seal your encryption keys.
         Your password never leaves this browser unencrypted.
     </p>
 
@@ -46,12 +49,10 @@
 
     <form class="keygen-form" id="keygen-form" autocomplete="off">
         <div class="form-group">
-            <label for="keygen-password">Your Password</label>
+            <label for="keygen-password" class="form-label">Your Password</label>
             <input id="keygen-password" class="form-input" type="password" name="password" required autofocus placeholder="Enter your password">
         </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary btn-lg w-full">Generate Keys</button>
-        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-full">Generate Keys</button>
     </form>
 
     <div class="keygen-status" id="keygen-loading">
@@ -60,11 +61,11 @@
     </div>
 
     <div class="keygen-done" id="keygen-done">
-        <p style="text-align:center;color:hsl(var(--foreground));font-weight:500;margin-bottom:20px;">
-            Keys generated successfully!
+        <p style="text-align:center;color:hsl(var(--foreground));font-weight:500;margin-bottom:12px">
+            Keys generated successfully
         </p>
-        <p class="keygen-info">
-            <strong>Important:</strong> Your recovery code is shown on the next page.
+        <p class="keygen-info" style="text-align:center">
+            <strong style="color:hsl(var(--foreground))">Important:</strong> Your recovery code is shown on the next page.
             You will need it if you forget your password.
         </p>
         <form method="GET" action="{{ route('recovery-code') }}">

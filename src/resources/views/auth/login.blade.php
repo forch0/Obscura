@@ -1,6 +1,8 @@
 @extends('layouts.auth')
 
 @section('title', 'Sign In — Obscura')
+@section('card-title', 'Welcome back')
+@section('card-subtitle', 'Sign in to your encrypted workspace')
 
 @section('content')
 <form method="POST" action="{{ route('login') }}" id="login-form">

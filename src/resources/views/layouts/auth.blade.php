@@ -22,6 +22,12 @@
             <a href="{{ route('home') }}" style="font-size:1.5rem;font-weight:700;letter-spacing:-0.025em;color:hsl(var(--foreground));text-decoration:none">Obscura</a>
         </div>
         <div class="card">
+            @hasSection('card-title')
+                <h2 style="margin-bottom:4px">@yield('card-title')</h2>
+            @endif
+            @hasSection('card-subtitle')
+                <p class="text-caption text-secondary" style="margin-bottom:20px">@yield('card-subtitle')</p>
+            @endif
             @yield('content')
         </div>
     </div>

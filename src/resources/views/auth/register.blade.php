@@ -1,6 +1,8 @@
 @extends('layouts.auth')
 
 @section('title', 'Register — Obscura')
+@section('card-title', 'Create your account')
+@section('card-subtitle', 'Set up your private workspace')
 
 @section('content')
 <form method="POST" action="{{ route('register') }}">
