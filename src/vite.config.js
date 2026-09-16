@@ -4,8 +4,24 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/js/crypto/keypair.js',
+                'resources/js/crypto/pbkdf2.js',
+                'resources/js/crypto/session.js',
+                'resources/js/crypto/recovery.js',
+            ],
             refresh: true,
         }),
     ],
+    build: {
+        rollupOptions: {
+            preserveEntrySignatures: 'strict',
+            output: {
+                entryFileNames: 'assets/[name]-[hash].js',
+                chunkFileNames: 'assets/[name]-[hash].js',
+            },
+        },
+    },
 });
