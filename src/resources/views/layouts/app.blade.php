@@ -26,6 +26,7 @@
             <a href="/" style="font-size:1.25rem;font-weight:700;color:var(--accent);text-decoration:none;margin-bottom:16px">Obscura</a>
             <a href="{{ route('workspaces.index') }}" style="color:var(--text);text-decoration:none;padding:8px 12px;border-radius:8px;display:block" class="sidebar-link">Workspaces</a>
             <a href="{{ route('enter') }}" style="color:var(--text-secondary);text-decoration:none;padding:8px 12px;border-radius:8px;display:block" class="sidebar-link">Enter Code</a>
+            <a href="{{ route('about') }}" style="color:var(--text-secondary);text-decoration:none;padding:8px 12px;border-radius:8px;display:block" class="sidebar-link">About</a>
         </nav>
 
         {{-- Main content --}}
