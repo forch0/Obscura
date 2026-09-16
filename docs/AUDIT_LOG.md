@@ -610,8 +610,151 @@ From `docs/modules/03-access-codes.md` §10:
 
 ## Module 4 — Collections & Galleries
 
-**Status:** ⬜ Not started
-**Depends on:** Module 3
+**Status:** ✅ Implemented
+**Started:** 2026-09-16
+**Completed:** 2026-09-16
+**Branch:** `features/module-4`
+**Tests:** 34 new (151 total, 338 assertions)
+
+---
+
+### 1. Database Layer
+
+| File | Status | Description |
+|---|---|---|
+| `database/migrations/2026_09_16_212018_create_collections_table.php` | ✅ Created | UUID PK, `workspace_id` FK (cascade), `encrypted_name`, `name_iv`, `encrypted_description`, `description_iv`. |
+| `database/migrations/2026_09_16_212019_create_galleries_table.php` | ✅ Created | UUID PK, `collection_id` FK (cascade), `encrypted_name`, `name_iv`, `type` enum (private/shared/joint), `encrypted_description`, `description_iv`. Index on `[collection_id, type]`. |
+| `database/migrations/2026_09_16_212019_create_gallery_members_table.php` | ✅ Created | UUID PK, `gallery_id` + `user_id` FKs (cascade), `role` (editor/viewer). Unique on `[gallery_id, user_id]`. |
+
+**Verification:**
+- `php artisan migrate:fresh` — ✅ All 11 migrations run cleanly
+- `collections` table: 7 columns — ✅
+- `galleries` table: 8 columns — ✅
+- `gallery_members` table: 5 columns + unique constraint — ✅
+
+---
+
+### 2. Models
+
+| File | Status | Description |
+|---|---|---|
+| `app/Models/Collection.php` | ✅ Created | `UsesUuid` trait. Fillables for all columns. Relations: `workspace()`, `galleries()`, `auditLogs()`. |
+| `app/Models/Gallery.php` | ✅ Created | `UsesUuid` trait. Type constants (PRIVATE/SHARED/JOINT). `isPrivate()`, `isShared()`, `isJoint()` helpers. Relations: `collection()`, `members()`, `workspace()`. |
+| `app/Models/GalleryMember.php` | ✅ Created | `UsesUuid` trait. Role constants (EDITOR/VIEWER). Relations: `gallery()`, `user()`. |
+| `app/Models/Workspace.php` | ✅ Modified | Added `collections()` relation. |
+
+---
+
+### 3. Services
+
+| File | Status | Description |
+|---|---|---|
+| `app/Services/Authorization/AuthorizationResolver.php` | ✅ Created | Centralizes first-match-wins authorization. `check($user, $subject, $ability)` — resolves workspace from subject (Workspace → Collection → Gallery). Checks: SuperAdmin → Owner → WorkspaceMember → AccessCode → deny. `checkMemberAbility()` handles gallery type semantics (private blocks members, shared/joint allow view, joint+editor allows edit/upload). `checkCodeAbility()` verifies scope coverage (workspace covers all, collection covers its galleries, gallery covers only itself) + permission bitmask. |
+
+---
+
+### 4. Policies
+
+| File | Status | Description |
+|---|---|---|
+| `app/Policies/CollectionPolicy.php` | ✅ Created | `before()` — super admin bypass. `viewAny`/`view` — owner or workspace member. `create`/`update`/`delete` — owner only. |
+| `app/Policies/GalleryPolicy.php` | ✅ Created | `before()` — super admin bypass. `view` — owner, workspace member (shared/joint only, private denied), joint+editor. `create` — owner. `update` — owner or joint+editor. `delete` — owner only. |
+
+---
+
+### 5. Controllers
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/CollectionController.php` | ✅ Created | Full CRUD nested under workspaces. `index` — list collections. `create`/`store` — encrypt name+description client-side, store ciphertext. `show` — collection detail with nested galleries. `edit`/`update` — rename. `destroy` — delete (cascades to galleries). Audit logs: `collection.created`, `collection.renamed`, `collection.deleted`. |
+| `app/Http/Controllers/GalleryController.php` | ✅ Created | Full CRUD nested under collections. `create`/`store` — encrypt name+desc+type. `show` — uses `AuthorizationResolver` for access check. `edit`/`update` — rename + type change. `destroy` — delete. Audit logs: `gallery.created`, `gallery.renamed`, `gallery.deleted`. |
+| `app/Http/Controllers/GalleryMemberController.php` | ✅ Created | `index` — list members. `store` — add member (validates workspace membership, type rules: private rejects, shared only viewer). `update` — change role. `destroy` — remove member. Audit logs: `gallery.member_added`, `gallery.member_role_changed`, `gallery.member_removed`. |
+
+---
+
+### 6. Routes
+
+| File | Status | Description |
+|---|---|---|
+| `routes/web.php` | ✅ Modified | Added nested resource routes: `workspaces/{workspace}/collections/*` (7 routes) + `collections/{collection}/galleries/*` (7 routes) + `galleries/{gallery}/members/*` (4 routes). All under `['auth', 'keypair']` middleware. |
+
+**Total routes now:** ~45
+
+---
+
+### 7. Views
+
+| File | Status | Description |
+|---|---|---|
+| `resources/views/collections/index.blade.php` | ✅ Created | Lists collections with decrypted names. JS unseals DEK → decryptName for each. Links to open/edit. |
+| `resources/views/collections/create.blade.php` | ✅ Created | Create form. JS encrypts name + optional description with workspace DEK → POSTs to server. |
+| `resources/views/collections/show.blade.php` | ✅ Created | Collection detail. Decrypts name + description. Lists nested galleries with type labels. Links to create gallery. |
+| `resources/views/collections/edit.blade.php` | ⬜ Skipped | Rename handled inline in `collections.index` — can add if needed. |
+| `resources/views/galleries/create.blade.php` | ✅ Created | Create form with name, type selector (private/shared/joint), description. JS encrypts → POSTs. |
+| `resources/views/galleries/show.blade.php` | ✅ Created | Gallery detail. Decrypts name + description. Shows type badge. Links to members (if not private) + edit. Placeholder for media grid (Module 5). |
+| `resources/views/galleries/members.blade.php` | ⬜ Skipped | Member management via controller + API. Can add UI view if needed. |
+
+---
+
+### 8. Factories
+
+| File | Status | Description |
+|---|---|---|
+| `database/factories/CollectionFactory.php` | ✅ Created | `workspace_id` → Workspace::factory(), random encrypted_name/desc, `name_iv`/`description_iv`. |
+| `database/factories/GalleryFactory.php` | ✅ Created | `collection_id` → Collection::factory(), `type` = private (default). States: `shared()`, `joint()`. |
+| `database/factories/GalleryMemberFactory.php` | ✅ Created | `gallery_id` + `user_id`, `role` = viewer (default). State: `editor()`. |
+
+---
+
+### 9. Tests
+
+| File | Status | Tests | Description |
+|---|---|---|---|
+| `tests/Feature/Collections/CollectionTest.php` | ✅ Created | 8 | Create, non-owner 403, audit logged, UUID, rename, delete, cascade to galleries, workspace scoping (404). |
+| `tests/Feature/Galleries/GalleryTest.php` | ✅ Created | 8 | Create all 3 types, private owner-only, shared member view, joint editor view, collection scoping (404), owner delete. |
+| `tests/Feature/Galleries/GalleryMemberTest.php` | ✅ Created | 7 | Add member to joint, shared rejects editor, private rejects all, member must be workspace member, remove member, role change, audit logged. |
+| `tests/Unit/Services/AuthorizationResolverTest.php` | ✅ Created | 11 | Super admin bypass, owner bypass, member view collections, private denies members, shared allows view, joint editor edit, joint viewer no edit, stranger denied, workspace-scoped code, collection-scoped code, gallery-scoped code. |
+
+**Module 4 total: 34 tests**
+**Project total: 151 tests, 338 assertions — all passing ✅**
+
+---
+
+### 10. Fixes Applied During Module 4
+
+| Issue | Fix |
+|---|---|
+| `GalleryMemberController` missing `Collection` param | Updated all method signatures to `Collection $collection, Gallery $gallery` (nested route) |
+| `galleries.members` route missing `gallery` param | Updated view to pass both `$collection` and `$gallery` |
+| `AuthorizationResolver` needed for gallery access | Used `app(AuthorizationResolver::class)->check()` in `GalleryController::show/edit/update/destroy` instead of `$this->authorize` (which uses policy) |
+
+---
+
+### 11. Acceptance Criteria Checklist
+
+From `docs/modules/04-collections-galleries.md` §9:
+
+- [x] Owner can create collections and galleries within a workspace
+- [x] Galleries can be private, shared, or joint
+- [x] Owner can add/remove gallery members for shared/joint galleries
+- [x] Private galleries are owner-only (members + code-holders get 403)
+- [x] Shared galleries: members can view; only owner can edit
+- [x] Joint galleries: editor members can upload/edit; viewer members can view
+- [x] Access codes scoped to a collection only cover that collection's galleries
+- [x] Access codes scoped to a gallery only cover that one gallery
+- [x] Deleting a collection cascades to its galleries
+- [x] Deleting a gallery cascades to its members
+- [x] AuthorizationResolver enforces first-match-wins correctly (all paths tested)
+- [x] Collection and gallery names are encrypted at rest with the workspace DEK
+- [x] Server never sees plaintext names or descriptions
+- [x] Browser decrypts names before rendering navigation/listing views
+- [x] Super Admin sees only encrypted blobs for names (cannot read them)
+- [x] All tests pass (151 tests, 338 assertions)
+- [ ] JS crypto round-trip tests (deferred — requires browser/Vitest)
+
+---
+
+## Module 5 — Media Upload & Decrypt
 
 ---
 
