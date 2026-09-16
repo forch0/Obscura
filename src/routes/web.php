@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\UseCasesController;
 use App\Http\Controllers\AccessCodeController;
 use App\Http\Controllers\AccessCodeEntryController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -21,6 +22,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/about', AboutController::class)->name('about');
+Route::get('/use-cases', UseCasesController::class)->name('use-cases');
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');

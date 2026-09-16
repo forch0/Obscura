@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('title', 'About — Obscura')
 
@@ -6,7 +6,7 @@
 <div style="max-width:720px;margin:0 auto">
 
     {{-- Hero --}}
-    <div style="padding:48px 0 32px;border-bottom:1px solid hsl(hsl(var(--border)));margin-bottom:32px">
+    <div style="padding:48px 0 32px;border-bottom:1px solid hsl(var(--border));margin-bottom:32px">
         <h1 style="margin-bottom:12px">About Obscura</h1>
         <p style="font-size:1.125rem;color:hsl(var(--muted-foreground));line-height:1.6">
             A private, end-to-end encrypted image gallery platform.
@@ -67,34 +67,34 @@
         <div class="card">
             <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
                 <thead>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <th style="text-align:left;padding:10px 0;font-weight:600">Layer</th>
                         <th style="text-align:left;padding:10px 0;font-weight:600">Algorithm</th>
                         <th style="text-align:left;padding:10px 0;font-weight:600">Where</th>
                     </tr>
                 </thead>
                 <tbody class="text-secondary">
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0">Media files</td>
                         <td>AES-256-GCM (per-file CEK)</td>
                         <td>Browser</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0">Thumbnails</td>
                         <td>AES-256-GCM</td>
                         <td>Browser</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0">Titles / Captions / Names</td>
                         <td>AES-256-GCM (workspace DEK)</td>
                         <td>Browser</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0">Key wrapping</td>
                         <td>RSA-OAEP 2048 / SHA-256</td>
                         <td>Browser</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0">Access code hashing</td>
                         <td>Argon2id</td>
                         <td>Server</td>
@@ -160,7 +160,7 @@
         <div class="card" style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
                 <thead>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <th style="text-align:left;padding:10px 0;font-weight:600">Role</th>
                         <th style="text-align:left;padding:10px 0;font-weight:600">View</th>
                         <th style="text-align:left;padding:10px 0;font-weight:600">Upload</th>
@@ -170,7 +170,7 @@
                     </tr>
                 </thead>
                 <tbody class="text-secondary">
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0;font-weight:500;color:hsl(var(--foreground))">Owner</td>
                         <td style="padding:10px 0">&#10003;</td>
                         <td style="padding:10px 0">&#10003;</td>
@@ -178,7 +178,7 @@
                         <td style="padding:10px 0">&#10003;</td>
                         <td style="padding:10px 0">&#10003;</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0;font-weight:500;color:hsl(var(--foreground))">Editor</td>
                         <td style="padding:10px 0">&#10003;</td>
                         <td style="padding:10px 0">&#10003;</td>
@@ -186,7 +186,7 @@
                         <td style="padding:10px 0">&mdash;</td>
                         <td style="padding:10px 0">&mdash;</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0;font-weight:500;color:hsl(var(--foreground))">Viewer</td>
                         <td style="padding:10px 0">&#10003;</td>
                         <td style="padding:10px 0">&mdash;</td>
@@ -194,7 +194,7 @@
                         <td style="padding:10px 0">&mdash;</td>
                         <td style="padding:10px 0">&mdash;</td>
                     </tr>
-                    <tr style="border-bottom:1px solid hsl(hsl(var(--border)))">
+                    <tr style="border-bottom:1px solid hsl(var(--border))">
                         <td style="padding:10px 0;font-weight:500;color:hsl(var(--foreground))">Code Holder</td>
                         <td style="padding:10px 0">&#10003;</td>
                         <td style="padding:10px 0">if granted</td>
@@ -212,7 +212,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p class="text-caption" style="margin-top:16px;padding-top:12px;border-top:1px solid hsl(hsl(var(--border)))">
+            <p class="text-caption" style="margin-top:16px;padding-top:12px;border-top:1px solid hsl(var(--border))">
                 The Super Admin cannot decrypt content. They see only encrypted metadata — no DEK, no plaintext.
             </p>
         </div>
@@ -227,23 +227,23 @@
                 collection, or gallery, with configurable permissions and expiration.
             </p>
             <div style="display:grid;gap:8px;font-size:0.875rem">
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(hsl(var(--border)))">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border))">
                     <span class="font-medium">Format</span>
                     <span class="mono">XXXX-XXXX-XXXX</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(hsl(var(--border)))">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border))">
                     <span class="font-medium">Length</span>
                     <span>12 characters (Base32)</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(hsl(var(--border)))">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border))">
                     <span class="font-medium">Hashing</span>
                     <span>Argon2id</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(hsl(var(--border)))">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border))">
                     <span class="font-medium">Permissions</span>
                     <span>View, Upload, Comment</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(hsl(var(--border)))">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border))">
                     <span class="font-medium">Duration</span>
                     <span>Minutes to days</span>
                 </div>
@@ -277,7 +277,7 @@
     </section>
 
     {{-- Footer --}}
-    <div style="text-align:center;padding:32px 0;border-top:1px solid hsl(hsl(var(--border)))">
+    <div style="text-align:center;padding:32px 0;border-top:1px solid hsl(var(--border))">
         <p class="text-caption">
             <a href="{{ route('home') }}" style="color:hsl(var(--foreground));text-decoration:none">Obscura</a> &middot;
             <a href="{{ route('workspaces.index') }}" style="color:hsl(var(--muted-foreground));text-decoration:none">Dashboard</a> &middot;

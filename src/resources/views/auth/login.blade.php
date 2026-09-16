@@ -1,29 +1,21 @@
 @extends('layouts.auth')
 
 @section('title', 'Sign In — Obscura')
-@section('subtitle', 'Private encrypted gallery')
 
 @section('content')
 <form method="POST" action="{{ route('login') }}">
     @csrf
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" class="form-input" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="you@example.com">
+    <x-input label="Email" name="email" type="email" :placeholder="'you@example.com'" required value="{{ old('email') }}" autofocus />
+    <x-input label="Password" name="password" type="password" placeholder="Your password" required />
+    <div class="form-group" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" name="remember" id="remember" style="width:16px;height:16px">
+        <label for="remember" class="text-caption" style="margin:0;cursor:pointer">Remember me</label>
     </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" class="form-input" type="password" name="password" required placeholder="Your password">
-    </div>
-    <div class="form-group" style="display:flex;align-items:center;gap:8px;">
-        <input type="checkbox" name="remember" id="remember" style="width:16px;height:16px;">
-        <label for="remember" style="margin:0;font-size:0.875rem;color:hsl(var(--muted-foreground));">Remember me</label>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn-primary">Sign In</button>
-    </div>
+    <x-button type="submit" variant="primary" size="lg" pill class="w-full">Sign In</x-button>
 </form>
-<div class="auth-links">
-    Don't have an account? <a href="{{ route('register') }}">Register</a><br>
-    <a href="{{ route('recover') }}">Forgot password?</a>
+<div style="text-align:center;margin-top:20px;font-size:0.875rem">
+    <span class="text-secondary">Don't have an account?</span>
+    <a href="{{ route('register') }}" style="color:hsl(var(--foreground));font-weight:500;text-decoration:none">Register</a><br>
+    <a href="{{ route('recover') }}" class="text-caption" style="text-decoration:none;display:inline-block;margin-top:8px">Forgot password?</a>
 </div>
 @endsection

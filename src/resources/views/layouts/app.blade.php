@@ -23,7 +23,6 @@
             <a href="{{ route('home') }}" class="sidebar-logo">Obscura</a>
             <a href="{{ route('workspaces.index') }}" class="sidebar-link {{ request()->routeIs('workspaces.*') ? 'active' : '' }}">Workspaces</a>
             <a href="{{ route('enter') }}" class="sidebar-link {{ request()->routeIs('enter*') ? 'active' : '' }}">Enter Code</a>
-            <a href="{{ route('about') }}" class="sidebar-link {{ request()->routeIs('about') ? 'active' : '' }}">About</a>
         </nav>
 
         <main class="app-main">

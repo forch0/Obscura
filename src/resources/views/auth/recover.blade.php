@@ -24,13 +24,13 @@
             <input id="password_confirmation" class="form-input" type="password" name="password_confirmation" required placeholder="Repeat new password">
         </div>
         <div class="form-group">
-            <button type="submit" class="btn-primary" :disabled="loading">
+            <button type="submit" class="btn btn-primary btn-lg w-full" :disabled="loading">
                 <span x-show="!loading">Reset Password</span>
                 <span x-show="loading" x-cloak>Recovering...</span>
             </button>
         </div>
     </form>
-    <div class="auth-links">
+    <div style="text-align:center;margin-top:20px;font-size:0.875rem">
         <a href="{{ route('login') }}">Back to sign in</a>
     </div>
 </div>

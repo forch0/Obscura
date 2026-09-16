@@ -50,7 +50,7 @@
             <input id="keygen-password" class="form-input" type="password" name="password" required autofocus placeholder="Enter your password">
         </div>
         <div class="form-group">
-            <button type="submit" class="btn-primary">Generate Keys</button>
+            <button type="submit" class="btn btn-primary btn-lg w-full">Generate Keys</button>
         </div>
     </form>
 
@@ -68,7 +68,7 @@
             You will need it if you forget your password.
         </p>
         <form method="GET" action="{{ route('recovery-code') }}">
-            <button type="submit" class="btn-primary">View Recovery Code</button>
+            <button type="submit" class="btn btn-primary btn-lg w-full">View Recovery Code</button>
         </form>
     </div>
 </div>

@@ -61,14 +61,14 @@
         <div class="recovery-actions">
             <button class="btn-secondary" onclick="window.print()">Print</button>
             <form method="GET" action="{{ route('home') }}" style="flex:2;">
-                <button type="submit" class="btn-primary">I've saved it — continue</button>
+                <button type="submit" class="btn btn-primary btn-lg w-full">I've saved it — continue</button>
             </form>
         </div>
     </div>
 
     <div id="no-code" class="no-code" style="display:none;">
         <p>No recovery code found. It may have already been displayed.</p>
-        <div class="auth-links">
+        <div style="text-align:center;margin-top:20px;font-size:0.875rem">
             <a href="{{ route('home') }}">Continue to home</a>
         </div>
     </div>

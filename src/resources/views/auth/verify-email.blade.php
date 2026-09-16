@@ -19,11 +19,11 @@
     <form method="POST" action="{{ route('verification.send') }}">
         @csrf
         <div class="form-group">
-            <button type="submit" class="btn-primary">Resend Verification Email</button>
+            <button type="submit" class="btn btn-primary btn-lg w-full">Resend Verification Email</button>
         </div>
     </form>
 
-    <div class="auth-links">
+    <div style="text-align:center;margin-top:20px;font-size:0.875rem">
         <a href="{{ route('home') }}">Continue to Obscura</a>
     </div>
 </div>
