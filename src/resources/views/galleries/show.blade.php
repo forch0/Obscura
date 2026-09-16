@@ -5,7 +5,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <p class="text-caption"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:var(--accent);text-decoration:none">← Back to collection</a></p>
+            <p class="text-caption"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to collection</a></p>
             <h2 id="gallery-name" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
             <p id="gallery-type" class="text-caption"></p>
         </div>
@@ -44,7 +44,7 @@
         const collectionId = collection.id;
         const csrf = document.querySelector('meta[name=csrf-token]').content;
         const typeLabels = { private: 'Private', shared: 'Shared', joint: 'Joint' };
-        const typeBadge = { private: '', shared: 'badge-accent', joint: 'badge-success' };
+        const typeBadge = { private: '', shared: 'badge-primary', joint: 'badge-secondary' };
 
         let dekHandle;
 

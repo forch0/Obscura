@@ -17,9 +17,11 @@
     @vite(['resources/css/app.css'])
 </head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px">
-    <div style="width:100%;max-width:400px">
-        <div class="card" style="padding:32px">
-            <h1 style="text-align:center;margin-bottom:24px;font-size:1.5rem;color:var(--accent)">Obscura</h1>
+    <div style="width:100%;max-width:380px">
+        <div style="text-align:center;margin-bottom:24px">
+            <a href="{{ route('home') }}" style="font-size:1.5rem;font-weight:700;letter-spacing:-0.025em;color:hsl(var(--foreground));text-decoration:none">Obscura</a>
+        </div>
+        <div class="card">
             @yield('content')
         </div>
     </div>

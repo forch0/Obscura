@@ -3,7 +3,7 @@
 @section('title', 'Enter Access Code — Obscura')
 
 @section('content')
-    <p style="text-align:center;font-size:0.875rem;color:var(--text-secondary);margin-bottom:16px">You've been invited to view a private gallery</p>
+    <p style="text-align:center;font-size:0.875rem;color:hsl(var(--muted-foreground));margin-bottom:16px">You've been invited to view a private gallery</p>
     <form method="POST" action="{{ route('enter') }}">
         @csrf
         <div class="form-group">
@@ -14,6 +14,6 @@
         <x-button type="submit" variant="primary" size="lg" pill class="w-full">Unlock</x-button>
     </form>
     <p style="text-align:center;margin-top:16px;font-size:0.875rem">
-        <a href="{{ route('register') }}" style="color:var(--accent);text-decoration:none">Create an account</a>
+        <a href="{{ route('register') }}" style="color:hsl(var(--foreground));text-decoration:none">Create an account</a>
     </p>
 @endsection

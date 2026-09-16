@@ -11,7 +11,7 @@
 @endif
 
 <div style="text-align:center;padding:20px 0;">
-    <p style="color:var(--text-secondary);font-size:0.9375rem;line-height:1.6;margin-bottom:24px;">
+    <p style="color:hsl(var(--muted-foreground));font-size:0.9375rem;line-height:1.6;margin-bottom:24px;">
         We've sent a verification link to your email address.<br>
         Please click the link to verify your account.
     </p>

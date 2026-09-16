@@ -39,7 +39,7 @@
                 const isRevoked = c.revoked_at !== null;
                 const isExpired = new Date(c.expires_at) < new Date();
                 const status = isRevoked ? 'Revoked' : isExpired ? 'Expired' : 'Active';
-                const statusClass = isRevoked ? 'badge-danger' : isExpired ? 'badge-warning' : 'badge-success';
+                const statusClass = isRevoked ? 'badge-destructive' : isExpired ? 'badge-secondary' : 'badge-secondary';
                 const opacity = isRevoked || isExpired ? 'opacity:0.5' : '';
 
                 const card = document.createElement('div');
@@ -49,8 +49,8 @@
                     <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:12px">
                         <div>
                             <h3 style="margin-bottom:4px">${c.label || 'Untitled'}</h3>
-                            <p class="text-caption text-secondary">${c.scope} Â· ${c.permission_names.join(' Â· ')}</p>
-                            <p class="text-caption text-muted">Uses: ${c.use_count}${c.max_uses > 0 ? ' / ' + c.max_uses : ''} Â· Expires: ${new Date(c.expires_at).toLocaleString()}</p>
+                            <p class="text-caption text-secondary">${c.scope} Â&middot; ${c.permission_names.join(' Â&middot; ')}</p>
+                            <p class="text-caption text-muted">Uses: ${c.use_count}${c.max_uses > 0 ? ' / ' + c.max_uses : ''} Â&middot; Expires: ${new Date(c.expires_at).toLocaleString()}</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="badge ${statusClass}">${status}</span>

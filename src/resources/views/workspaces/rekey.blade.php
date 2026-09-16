@@ -9,9 +9,9 @@
     </div>
 
     <div class="card" style="max-width:560px">
-        <h3 style="color:var(--danger)">Warning</h3>
+        <h3 style="color:hsl(var(--destructive))">Warning</h3>
         <p class="text-secondary">Re-keying generates a new encryption key for this workspace. This will:</p>
-        <ul style="margin:12px 0;padding-left:20px;color:var(--text-secondary);font-size:0.875rem;list-style:disc">
+        <ul style="margin:12px 0;padding-left:20px;color:hsl(var(--muted-foreground));font-size:0.875rem;list-style:disc">
             <li><strong>Invalidate all access codes</strong> — code holders will need new codes</li>
             <li><strong>Re-wrap all media keys</strong> — file contents are not re-encrypted, only the key wraps</li>
             <li><strong>Re-encrypt all names/descriptions</strong> — collections, galleries, media titles</li>
@@ -20,7 +20,7 @@
         <p class="text-caption text-muted">Current DEK version: {{ $workspace->dek_version }}</p>
 
         @if($activeJob)
-            <div style="margin-top:16px;padding:12px;background:var(--accent-subtle);border-radius:8px">
+            <div style="margin-top:16px;padding:12px;background:hsl(var(--secondary));border-radius:8px">
                 <p class="text-sm">A re-key is already in progress ({{ $activeJob->processed_media }}/{{ $activeJob->total_media }} media).</p>
             </div>
         @else
@@ -98,7 +98,7 @@
                 setWorkspaceDek(workspaceId, result.newDekHandle);
 
                 bar.style.width = '100%';
-                statusEl.innerHTML = `<p style="color:var(--accent)">Re-key complete. DEK version: ${done.dek_version}. ${done.codes_revoked} access codes revoked.</p>`;
+                statusEl.innerHTML = `<p style="color:hsl(var(--foreground))">Re-key complete. DEK version: ${done.dek_version}. ${done.codes_revoked} access codes revoked.</p>`;
             } catch (e) {
                 statusEl.textContent = 'Error: ' + e.message;
                 btn.disabled = false;

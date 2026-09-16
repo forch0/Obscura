@@ -5,7 +5,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <p class="text-caption"><a href="{{ route('collections.index', $workspace) }}" style="color:var(--accent);text-decoration:none">← Back to workspace</a></p>
+            <p class="text-caption"><a href="{{ route('collections.index', $workspace) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to workspace</a></p>
             <h2 id="collection-name" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
         </div>
         <div class="flex gap-2">
@@ -36,7 +36,7 @@
         const collectionId = collection.id;
 
         const typeLabels = { private: 'Private', shared: 'Shared', joint: 'Joint' };
-        const typeBadge = { private: '', shared: 'badge-accent', joint: 'badge-success' };
+        const typeBadge = { private: '', shared: 'badge-primary', joint: 'badge-secondary' };
 
         (async () => {
             const { unsealDek, decryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
@@ -74,7 +74,7 @@
                     card.href = `/collections/${collectionId}/galleries/${g.id}`;
                     card.className = 'card';
                     card.style.textDecoration = 'none';
-                    card.style.color = 'var(--text)';
+                    card.style.color = 'hsl(var(--foreground))';
                     card.innerHTML = `
                         <h3>${gName}</h3>
                         <p style="margin-top:4px"><span class="badge ${typeBadge[g.type] || ''}">${typeLabels[g.type] || g.type}</span></p>

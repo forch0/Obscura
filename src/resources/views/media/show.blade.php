@@ -5,7 +5,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:var(--accent);text-decoration:none">← Back to gallery</a></p>
+            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
             <h2 id="media-title" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
         </div>
         <form method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline" onsubmit="return confirm('Delete this media?')">

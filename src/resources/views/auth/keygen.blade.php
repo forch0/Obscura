@@ -11,25 +11,25 @@
     .keygen-status.active { display: block; }
     .keygen-spinner {
         width: 40px; height: 40px;
-        border: 3px solid var(--border);
-        border-top-color: var(--accent);
+        border: 3px solid hsl(var(--border));
+        border-top-color: hsl(var(--foreground));
         border-radius: 50%;
         margin: 0 auto 16px;
         animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .keygen-step { font-size: 0.875rem; color: var(--text-secondary); margin-top: 8px; }
+    .keygen-step { font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin-top: 8px; }
     .keygen-done { display: none; }
     .keygen-done.active { display: block; }
     .keygen-error {
         display: none;
         background: #fef2f2; border: 1px solid #fecaca;
-        color: var(--danger); padding: 12px 16px;
+        color: hsl(var(--destructive)); padding: 12px 16px;
         border-radius: 8px; font-size: 0.875rem; margin-bottom: 20px;
     }
     .keygen-error.active { display: block; }
     .keygen-info {
-        font-size: 0.8125rem; color: var(--text-secondary);
+        font-size: 0.8125rem; color: hsl(var(--muted-foreground));
         line-height: 1.5; margin-bottom: 20px;
     }
 </style>
@@ -60,7 +60,7 @@
     </div>
 
     <div class="keygen-done" id="keygen-done">
-        <p style="text-align:center;color:var(--success);font-weight:500;margin-bottom:20px;">
+        <p style="text-align:center;color:hsl(var(--foreground));font-weight:500;margin-bottom:20px;">
             Keys generated successfully!
         </p>
         <p class="keygen-info">

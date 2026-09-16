@@ -4,44 +4,50 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 export default {
     darkMode: ['class', '[data-theme="dark"]'],
     content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
         './resources/**/*.blade.php',
         './resources/**/*.js',
     ],
     theme: {
         extend: {
             colors: {
-                accent: {
-                    DEFAULT: 'var(--accent)',
-                    hover: 'var(--accent-hover)',
-                    subtle: 'var(--accent-subtle)',
+                border: 'hsl(var(--border))',
+                input: 'hsl(var(--input))',
+                ring: 'hsl(var(--ring))',
+                background: 'hsl(var(--background))',
+                foreground: 'hsl(var(--foreground))',
+                primary: {
+                    DEFAULT: 'hsl(var(--primary))',
+                    foreground: 'hsl(var(--primary-foreground))',
                 },
-                danger: 'var(--danger)',
-                success: 'var(--success)',
-                warning: 'var(--warning)',
+                secondary: {
+                    DEFAULT: 'hsl(var(--secondary))',
+                    foreground: 'hsl(var(--secondary-foreground))',
+                },
+                destructive: {
+                    DEFAULT: 'hsl(var(--destructive))',
+                    foreground: 'hsl(var(--destructive-foreground))',
+                },
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                accent: {
+                    DEFAULT: 'hsl(var(--accent))',
+                    foreground: 'hsl(var(--accent-foreground))',
+                },
+                card: {
+                    DEFAULT: 'hsl(var(--card))',
+                    foreground: 'hsl(var(--card-foreground))',
+                },
             },
-            backgroundColor: {
-                base: 'var(--bg)',
-                subtle: 'var(--bg-subtle)',
-                muted: 'var(--bg-muted)',
-            },
-            textColor: {
-                primary: 'var(--text)',
-                secondary: 'var(--text-secondary)',
-                muted: 'var(--text-muted)',
-            },
-            borderColor: {
-                DEFAULT: 'var(--border)',
+            borderRadius: {
+                lg: 'var(--radius)',
+                md: 'calc(var(--radius) - 2px)',
+                sm: 'calc(var(--radius) - 4px)',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
                 mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
-            },
-            maxWidth: {
-                content: '1400px',
-                form: '560px',
-                auth: '400px',
             },
         },
     },

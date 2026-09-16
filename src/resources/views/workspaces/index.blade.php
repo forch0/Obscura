@@ -54,7 +54,7 @@
                     card.href = `/workspaces/${ws.id}`;
                     card.className = 'card';
                     card.style.textDecoration = 'none';
-                    card.style.color = 'var(--text)';
+                    card.style.color = 'hsl(var(--foreground))';
                     card.innerHTML = `
                         <h3>${name}</h3>
                         <p class="text-caption text-secondary" style="margin-top:4px">Encrypted workspace</p>

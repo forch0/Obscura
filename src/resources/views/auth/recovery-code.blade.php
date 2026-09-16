@@ -6,8 +6,8 @@
 @section('extra-styles')
 <style>
     .recovery-code-display {
-        background: var(--bg-muted);
-        border: 1px solid var(--border);
+        background: hsl(var(--muted));
+        border: 1px solid hsl(var(--border));
         border-radius: 12px;
         padding: 24px;
         text-align: center;
@@ -18,7 +18,7 @@
         font-size: 1.25rem;
         font-weight: 500;
         letter-spacing: 0.08em;
-        color: var(--text);
+        color: hsl(var(--foreground));
         word-break: break-all;
     }
     .recovery-warning {
@@ -40,7 +40,7 @@
     .recovery-actions .btn-primary { flex: 2; }
     .no-code {
         text-align: center;
-        color: var(--text-secondary);
+        color: hsl(var(--muted-foreground));
         padding: 40px 0;
     }
 </style>

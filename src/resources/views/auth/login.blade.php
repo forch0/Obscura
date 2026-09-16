@@ -16,7 +16,7 @@
     </div>
     <div class="form-group" style="display:flex;align-items:center;gap:8px;">
         <input type="checkbox" name="remember" id="remember" style="width:16px;height:16px;">
-        <label for="remember" style="margin:0;font-size:0.875rem;color:var(--text-secondary);">Remember me</label>
+        <label for="remember" style="margin:0;font-size:0.875rem;color:hsl(var(--muted-foreground));">Remember me</label>
     </div>
     <div class="form-group">
         <button type="submit" class="btn-primary">Sign In</button>

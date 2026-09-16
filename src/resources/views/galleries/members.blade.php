@@ -5,9 +5,9 @@
 @section('content')
     <div class="page-header">
         <div>
-            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:var(--accent);text-decoration:none">← Back to gallery</a></p>
+            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
             <h2 style="margin-top:4px">Gallery Members</h2>
-            <p class="text-caption"><span class="badge {{ $gallery->type === 'joint' ? 'badge-success' : 'badge-accent' }}">{{ ucfirst($gallery->type) }}</span></p>
+            <p class="text-caption"><span class="badge {{ $gallery->type === 'joint' ? 'badge-secondary' : 'badge-primary' }}">{{ ucfirst($gallery->type) }}</span></p>
         </div>
     </div>
 
@@ -35,7 +35,7 @@
         <div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
             <div>
                 <p class="font-medium">{{ $member->user->email }}</p>
-                <span class="badge {{ $member->role === 'editor' ? 'badge-success' : '' }}">{{ ucfirst($member->role) }}</span>
+                <span class="badge {{ $member->role === 'editor' ? 'badge-secondary' : '' }}">{{ ucfirst($member->role) }}</span>
             </div>
             <div class="flex gap-2">
                 <form method="POST" action="{{ route('galleries.members.destroy', [$collection, $gallery, $member]) }}" style="display:inline" onsubmit="return confirm('Remove this member?')">
