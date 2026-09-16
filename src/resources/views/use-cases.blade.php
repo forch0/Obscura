@@ -106,5 +106,39 @@
         </ul>
     </div>
 
+    <div class="use-case">
+        <span class="tag">Journalists &amp; Researchers</span>
+        <h2>Source Material</h2>
+        <p>
+            Receive sensitive photos, documents, and field imagery from sources
+            without creating a plaintext trail. Sources upload via a joint gallery
+            or a scoped access code — no account needed, no identifying metadata
+            stored in the clear. When the story is done, revoke access and re-key.
+        </p>
+        <ul>
+            <li>Sources upload without accounts — just an access code</li>
+            <li>Content encrypted before it touches the server</li>
+            <li>Audit log records every access for your records</li>
+            <li>Re-key wipes all outstanding access in one step</li>
+        </ul>
+    </div>
+
+    <div class="use-case">
+        <span class="tag">Events &amp; Venues</span>
+        <h2>Event Photo Delivery</h2>
+        <p>
+            Event photographers and venues can create a workspace per event,
+            organize galleries by session or day, and hand out access codes to
+            attendees. Codes can be set to expire after the event or after a
+            download window closes — no lingering access, no forgotten links.
+        </p>
+        <ul>
+            <li>One workspace per event, one gallery per session</li>
+            <li>Print access codes on badges, signage, or programs</li>
+            <li>Attendees view photos instantly — no app download</li>
+            <li>Auto-expiring codes close access when the event ends</li>
+        </ul>
+    </div>
+
 </section>
 @endsection

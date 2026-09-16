@@ -74,8 +74,8 @@
     <nav class="public-nav">
         <a href="{{ route('home') }}" class="logo">Obscura</a>
         <div class="links">
-            <a href="{{ route('use-cases') }}">Use Cases</a>
             <a href="{{ route('about') }}">About</a>
+            <a href="{{ route('use-cases') }}">Use Cases</a>
             <a href="{{ route('enter') }}">Enter Code</a>
             @auth
                 <a href="{{ route('workspaces.index') }}" class="btn btn-primary btn-sm">Dashboard</a>
@@ -91,8 +91,8 @@
     <footer class="public-footer">
         <p>
             <a href="{{ route('home') }}">Obscura</a> &middot;
-            <a href="{{ route('use-cases') }}">Use Cases</a> &middot;
             <a href="{{ route('about') }}">About</a> &middot;
+            <a href="{{ route('use-cases') }}">Use Cases</a> &middot;
             <a href="{{ route('enter') }}">Enter Code</a>
         </p>
     </footer>
