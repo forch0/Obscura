@@ -103,6 +103,7 @@
             <a href="{{ route('about') }}">About</a>
             <a href="{{ route('architecture') }}">Architecture</a>
             <a href="{{ route('use-cases') }}">Use Cases</a>
+            <a href="{{ route('showcase') }}">Case Study</a>
             <a href="{{ route('enter') }}">Enter Code</a>
             @auth
                 <a href="{{ route('workspaces.index') }}" class="btn btn-primary btn-sm">Dashboard</a>
@@ -122,6 +123,7 @@
         <a href="{{ route('about') }}">About</a>
         <a href="{{ route('architecture') }}">Architecture</a>
         <a href="{{ route('use-cases') }}">Use Cases</a>
+        <a href="{{ route('showcase') }}">Case Study</a>
         <a href="{{ route('enter') }}">Enter Code</a>
         @guest
             <a href="{{ route('login') }}">Sign In</a>
