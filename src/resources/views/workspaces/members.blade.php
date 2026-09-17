@@ -13,8 +13,8 @@
 
     <div class="card" style="max-width:560px;margin-bottom:24px">
         <h3>Add Member</h3>
-        <p class="text-caption text-secondary" style="margin-bottom:16px">The user must have registered and generated their keypair.</p>
         @if($eligible->isNotEmpty())
+            <p class="text-caption text-secondary" style="margin-bottom:16px">The user must have registered and generated their keypair.</p>
             <form method="POST" action="{{ route('workspaces.members.store', $workspace) }}" id="add-member-form">
                 @csrf
                 <input type="hidden" name="wrapped_dek" id="wrapped_dek">
@@ -36,12 +36,25 @@
                 <p id="add-member-status" class="text-caption text-secondary" style="margin-top:8px"></p>
             </form>
         @else
-            <x-empty-state title="No eligible users" message="Everyone with a keypair is already a member of this workspace." />
+            <div style="margin-top:12px;padding:14px 16px;background:hsl(var(--secondary));border-radius:8px">
+                <p class="text-sm font-medium">No one available to add right now.</p>
+                <p class="text-caption text-secondary" style="margin-top:4px">
+                    Everyone with a keypair is already a member. To add someone new, they need to
+                    <a href="{{ route('register') }}" style="color:hsl(var(--primary))">register</a> and generate their keypair first —
+                    or share an <a href="{{ route('access-codes.index', $workspace) }}" style="color:hsl(var(--primary))">access code</a> for view-only guest access instead.
+                </p>
+            </div>
         @endif
     </div>
 
-    <h3 style="margin-bottom:12px">Current Members</h3>
-    @forelse($members as $member)
+    <h3 style="margin-bottom:12px">Members ({{ $members->count() + 1 }})</h3>
+    <div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
+        <div>
+            <p class="font-medium">{{ $workspace->owner->email }}</p>
+            <span class="badge badge-primary">Owner</span>
+        </div>
+    </div>
+    @foreach($members as $member)
         <div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
             <div>
                 <p class="font-medium">{{ $member->user->email }}</p>
@@ -55,9 +68,7 @@
                 </form>
             </div>
         </div>
-    @empty
-        <x-empty-state title="No members" message="Add members to collaborate on this workspace." />
-    @endforelse
+    @endforeach
 @endsection
 
 @push('scripts')

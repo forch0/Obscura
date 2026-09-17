@@ -13,8 +13,8 @@
 
     <div class="card" style="max-width:560px;margin-bottom:24px">
         <h3>Add Member</h3>
-        <p class="text-caption text-secondary" style="margin-bottom:16px">Members must already be workspace members.</p>
         @if($eligible->isNotEmpty())
+            <p class="text-caption text-secondary" style="margin-bottom:16px">Members must already be workspace members.</p>
         <form method="POST" action="{{ route('galleries.members.store', [$collection, $gallery]) }}">
             @csrf
             <div class="form-group">
@@ -34,11 +34,17 @@
             <x-button type="submit" variant="primary">Add Member</x-button>
         </form>
         @else
-            <x-empty-state title="No eligible members" message="All workspace members are already in this gallery — or add workspace members first." />
+            <div style="margin-top:12px;padding:14px 16px;background:hsl(var(--secondary));border-radius:8px">
+                <p class="text-sm font-medium">No one available to add right now.</p>
+                <p class="text-caption text-secondary" style="margin-top:4px">
+                    All workspace members are already in this gallery — or
+                    <a href="{{ route('workspaces.members', $workspace) }}" style="color:hsl(var(--primary))">add workspace members</a> first.
+                </p>
+            </div>
         @endif
     </div>
 
-    <h3 style="margin-bottom:12px">Current Members</h3>
+    <h3 style="margin-bottom:12px">Members ({{ $members->count() }})</h3>
     @forelse($members as $member)
         <div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
             <div>
