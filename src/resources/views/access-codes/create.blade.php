@@ -17,7 +17,18 @@
                     'workspace' => 'Entire workspace',
                     'collection' => 'Collection',
                     'gallery' => 'Gallery',
-                ]" disabled-options="collection,gallery" />
+                ]" />
+            </div>
+            <div class="form-group" id="target-group" style="display:none">
+                <label class="form-label" id="target-label">Collection</label>
+                <div class="dropdown select-dropdown">
+                    <button type="button" class="form-input select-toggle dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="select-value" id="target-value">Decrypting…</span>
+                        <span class="caret">&#9662;</span>
+                    </button>
+                    <input type="hidden" name="scope_id" id="scope_id" value="">
+                    <div class="dropdown-menu select-menu" role="listbox" id="target-menu"></div>
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Permissions</label>
@@ -38,6 +49,7 @@
                 ]" />
             </div>
             <x-input label="Max Uses (0 = unlimited)" name="max_uses" type="number" :placeholder="0" />
+            <x-input label="Recipient Email (optional)" name="recipient_email" type="email" placeholder="person@example.com" />
             <x-input label="Label (optional)" name="label" placeholder="e.g., Sent to Alice" />
             <x-button type="submit" variant="primary" size="lg" pill class="w-full">Generate Code</x-button>
             <p class="decrypt-status" id="status" style="margin-top:12px"></p>
@@ -51,6 +63,66 @@
         const statusEl = document.getElementById('status');
         const submitBtn = form.querySelector('button[type=submit]');
         const workspaceId = '{{ $workspace->id }}';
+        const collections = @json($collections);
+
+        let dekHandle = null;
+
+        // Load DEK early so we can decrypt collection/gallery names for the scope picker
+        (async () => {
+            try {
+                const { unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+                const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+                const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
+                const { decryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+
+                const privateKeyHandle = await restorePrivateKey();
+                if (!privateKeyHandle) return;
+
+                dekHandle = getWorkspaceDek(workspaceId) || await unsealDek(@json($workspace->wrappedDekFor(auth()->user())), privateKeyHandle);
+                setWorkspaceDek(workspaceId, dekHandle);
+
+                // Decrypt all collection + gallery names
+                for (const c of collections) {
+                    c.name = await decryptName(c.encrypted_name, dekHandle, c.name_iv);
+                    for (const g of c.galleries) {
+                        g.name = await decryptName(g.encrypted_name, dekHandle, g.name_iv);
+                    }
+                }
+
+                document.getElementById('target-value').textContent = 'Select…';
+            } catch (e) {
+                document.getElementById('target-value').textContent = 'Could not decrypt names';
+            }
+        })();
+
+        // Show/hide + populate the target picker when scope changes
+        document.getElementById('scope').addEventListener('change', (e) => {
+            const scope = e.target.value;
+            const group = document.getElementById('target-group');
+            const label = document.getElementById('target-label');
+            const menu = document.getElementById('target-menu');
+            const input = document.getElementById('scope_id');
+            const value = document.getElementById('target-value');
+
+            if (scope === 'workspace') {
+                group.style.display = 'none';
+                input.value = '';
+                return;
+            }
+
+            group.style.display = '';
+            input.value = '';
+            value.textContent = 'Select…';
+            label.textContent = scope === 'collection' ? 'Collection' : 'Gallery';
+
+            const items = scope === 'collection'
+                ? collections.map(c => ({ id: c.id, name: c.name }))
+                : collections.flatMap(c => c.galleries.map(g => ({ id: g.id, name: `${c.name} / ${g.name}` })));
+
+            menu.innerHTML = items.map(i =>
+                `<button type="button" class="dropdown-item" data-value="${i.id}" role="option" aria-selected="false">${i.name ?? '(unnamed)'}</button>`
+            ).join('') || `<div style="padding:10px 16px;font-size:0.875rem;color:hsl(var(--muted-foreground))">No ${scope}s in this workspace</div>`;
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -58,6 +130,12 @@
             statusEl.innerHTML = '<span class="spinner"></span> Generating code…';
 
             try {
+                const scope = document.getElementById('scope').value;
+                const scopeId = document.getElementById('scope_id').value || null;
+                if (scope !== 'workspace' && !scopeId) {
+                    throw new Error(`Select a ${scope} first.`);
+                }
+
                 const permissions =
                     (document.getElementById('perm-view').checked ? 1 : 0) +
                     (document.getElementById('perm-upload').checked ? 2 : 0) +
@@ -71,15 +149,20 @@
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
-                        scope: document.getElementById('scope').value,
+                        scope,
+                        scope_id: scopeId,
                         permissions,
                         duration_minutes: parseInt(document.getElementById('duration').value),
                         max_uses: parseInt(document.getElementById('max_uses').value) || 0,
                         label: document.getElementById('label').value || null,
+                        recipient_email: document.getElementById('recipient_email').value || null,
                     }),
                 });
 
-                if (!response.ok) throw new Error('Failed to generate code');
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.message || 'Failed to generate code');
+                }
                 const { code_id, raw_code, code_salt } = await response.json();
 
                 statusEl.innerHTML = '<span class="spinner"></span> Sealing DEK…';
@@ -88,12 +171,10 @@
                 const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
                 const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
 
-                const privateKeyHandle = await restorePrivateKey();
-                if (!privateKeyHandle) throw new Error('Private key not loaded.');
-
-                let dekHandle = getWorkspaceDek(workspaceId);
                 if (!dekHandle) {
-                    dekHandle = await unsealDek(@json($workspace->wrappedDekFor(auth()->user())), privateKeyHandle);
+                    const privateKeyHandle = await restorePrivateKey();
+                    if (!privateKeyHandle) throw new Error('Private key not loaded.');
+                    dekHandle = getWorkspaceDek(workspaceId) || await unsealDek(@json($workspace->wrappedDekFor(auth()->user())), privateKeyHandle);
                     setWorkspaceDek(workspaceId, dekHandle);
                 }
 

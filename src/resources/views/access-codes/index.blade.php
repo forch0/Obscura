@@ -22,6 +22,7 @@
             'scope' => $c->scope,
             'permissions' => $c->permissions,
             'label' => $c->label,
+            'recipient_email' => $c->recipient_email,
             'expires_at' => $c->expires_at->toISOString(),
             'revoked_at' => $c->revoked_at?->toISOString(),
             'use_count' => $c->use_count,
@@ -51,6 +52,7 @@
                     <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:12px">
                         <div>
                             <h3 style="margin-bottom:4px">${c.label || 'Untitled'}</h3>
+                            ${c.recipient_email ? `<p class="text-caption" style="margin-bottom:4px">Shared with: <strong>${c.recipient_email}</strong></p>` : ''}
                             <p class="text-caption text-secondary">${c.scope} �&middot; ${c.permission_names.join(' �&middot; ')}</p>
                             <p class="text-caption text-muted">Uses: ${c.use_count}${c.max_uses > 0 ? ' / ' + c.max_uses : ''} �&middot; Expires: ${new Date(c.expires_at).toLocaleString()}</p>
                         </div>

@@ -33,6 +33,7 @@ class WorkspaceAccessCode extends Model
         'use_count',
         'created_by',
         'label',
+        'recipient_email',
     ];
 
     protected $hidden = [

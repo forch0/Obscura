@@ -28,7 +28,17 @@ class AccessCodeController extends Controller
     {
         $this->authorize('create', [WorkspaceAccessCode::class, $workspace]);
 
-        return view('access-codes.create', ['workspace' => $workspace]);
+        $collections = $workspace->collections()->with('galleries')->get()->map(fn($c) => [
+            'id' => $c->id,
+            'encrypted_name' => $c->encrypted_name,
+            'name_iv' => $c->name_iv,
+            'galleries' => $c->galleries->map(fn($g) => $g->only(['id', 'encrypted_name', 'name_iv']))->values(),
+        ])->values();
+
+        return view('access-codes.create', [
+            'workspace' => $workspace,
+            'collections' => $collections,
+        ]);
     }
 
     public function store(Request $request, Workspace $workspace)
@@ -42,6 +52,7 @@ class AccessCodeController extends Controller
             'duration_minutes' => ['required', 'integer', 'min:1', 'max:43200'], // max 30 days
             'max_uses' => ['nullable', 'integer', 'min:0'],
             'label' => ['nullable', 'string', 'max:255'],
+            'recipient_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $generated = $this->codes->generate();
@@ -59,6 +70,7 @@ class AccessCodeController extends Controller
             'max_uses' => $validated['max_uses'] ?? 0,
             'created_by' => $request->user()->id,
             'label' => $validated['label'] ?? null,
+            'recipient_email' => $validated['recipient_email'] ?? null,
         ]);
 
         $this->audit->log($request->user(), $code, 'access_code.generated', [
