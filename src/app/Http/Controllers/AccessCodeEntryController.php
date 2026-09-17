@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\WorkspaceAccessCode;
 use App\Services\AccessCode\CodeGeneratorService;
 use App\Services\AccessCode\CodeSessionService;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 
@@ -13,6 +14,7 @@ class AccessCodeEntryController extends Controller
     public function __construct(
         private CodeGeneratorService $codes,
         private CodeSessionService $sessions,
+        private AuditLogger $audit,
     ) {}
 
     public function create()
@@ -52,6 +54,13 @@ class AccessCodeEntryController extends Controller
 
         // Increment use count
         $matchedCode->incrementUseCount();
+
+        // Audit: the code itself is the actor — invitees have no user account
+        $this->audit->log($matchedCode, $matchedCode, 'access_code.used', [
+            'scope' => $matchedCode->scope,
+            'scope_id' => $matchedCode->scope_id,
+            'use_count' => $matchedCode->use_count,
+        ]);
 
         // Issue scoped session token (raw code embedded so the browser can
         // re-derive the code key and unseal the DEK on every page load)

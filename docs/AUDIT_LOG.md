@@ -1019,3 +1019,66 @@ From `docs/modules/06-rekey-revoke.md` Â§9:
 | 5 â€” Media Upload & Decrypt | `features/module-5` | 18 | âœ… |
 | 6 â€” Re-key on Revoke | `features/module-6` | 15 | âœ… |
 | **Total** | | **184 tests, 399 assertions** | **âœ… All passing** |
+
+---
+
+## Post-Module Work — Guest Access Viewer & Rate Limiting
+
+**Status:** Implemented
+**Date:** 2026-09-17
+**Branch:** `features/ui-design-system`
+
+---
+
+### 1. Guest Access Viewer (bug fix + feature)
+
+The `POST /enter` redirect targeted `workspaces.show` behind `auth` middleware —
+code-holders (who have no account) were bounced to `/login`. Implemented the missing
+guest-facing viewer:
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/AccessViewController.php` | Created | `show` — renders `access.view` with scoped galleries. `media` — media metadata per gallery, scope-checked. `blob`/`thumbnail` — ciphertext streams, scope-checked before serving. Out-of-scope ? 403. |
+| `app/Http/Middleware/ValidateAccessCodeSession.php` | Modified | Added `required` parameter mode: `access_code:required` denies when the session cookie is absent; without the param it remains a soft context attacher. |
+| `app/Services/AccessCode/CodeSessionService.php` | Modified | `issue()` now embeds `raw_code` + `code_salt` in the encrypted payload so the browser can re-derive the code key and unseal the DEK on every load. |
+| `app/Http/Controllers/AccessCodeEntryController.php` | Modified | Redirects to `access.view` instead of `workspaces.show`. Passes raw code to `issue()`. Logs `access_code.used` audit event (code as actor — invitees have no user record). |
+| `resources/views/access/view.blade.php` | Created | Guest viewer: PBKDF2 code key ? unseal DEK ? decrypt workspace/gallery names ? gallery grid ? media grid ? lightbox (photo/video/PDF). |
+| `resources/views/layouts/guest.blade.php` | Created | Minimal public layout for code-holders: top bar, content area, shared footer. Flex column for sticky footer. |
+
+**New routes:** `GET /access`, `GET /access/galleries/{gallery}/media`, `GET /access/media/{medium}/blob`, `GET /access/media/{medium}/thumbnail` — all behind `access_code:required`.
+
+**New audit action:** `access_code.used` — recorded on every successful code entry, with scope + use_count context.
+
+---
+
+### 2. Rate Limiting
+
+Rate limiters defined in `app/Providers/AppServiceProvider.php::boot()` and applied
+via `throttle:<name>` middleware in `routes/web.php`:
+
+| Limiter | Applied to | Limit | Keyed by |
+|---|---|---|---|
+| `login` | `POST /login` | 5/min | email + IP |
+| `register` | `POST /register` | 3/min | IP |
+| `recover` | `POST /recover`, `/recover/reset` | 5/min | IP |
+| `email` | `POST /email/verification-notification` | 6/min | user ID or IP |
+| `code-entry` | `POST /enter` | 10/min | IP |
+| `access-view` | All `/access/*` guest routes | 120/min | IP |
+| `code-generate` | `POST access-codes`, `access-codes/{code}/dek` | 20/min | user ID |
+| `media-upload` | `POST /galleries/{gallery}/media` | 30/min | user ID |
+| `media-read` | Media index, blob, thumbnail | 240/min | user ID or IP |
+| `rekey` | Re-key initiate/status/complete | 6/min | user ID |
+| `keypair` | `/api/keypair` GET+POST | 10/min | user ID |
+| `writes` | All other authenticated mutations (workspaces, collections, galleries, members) | 60/min | user ID |
+
+**Rationale:** `code-entry` is the highest-value brute-force target — access codes are
+12-char Base32 (~60 bits, strong) but the endpoint costs an Argon2id verify per attempt,
+so 10/min bounds both guessing and CPU abuse. `login` is keyed by email+IP so an
+attacker can't lock out a specific account by spraying it, while still throttling
+credential stuffing across accounts. Media reads are generous (240/min) since a
+gallery browse legitimately fetches dozens of thumbnails.
+
+**Verification:**
+- `php artisan route:list` — 70 routes register cleanly, throttles attached
+- `EnterCodeTest` + `LoginTest` — 17 tests pass with throttles active
+- `access_code.used` audit entries confirmed in test run
