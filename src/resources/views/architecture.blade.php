@@ -210,6 +210,12 @@ Browser                                    Server
             The server writes the blob to <code class="mono">storage/app/private/</code> — outside the web root,
             only reachable through an authorization-gated streaming route.
         </p>
+        <p style="margin-top:12px">
+            <strong>Batch uploads</strong> are processed client-side, one file at a time —
+            encrypt → upload → next — with per-file progress. Limits are enforced before any work starts:
+            max 20 files per batch, 100&nbsp;MB per file, 500&nbsp;MB total. A failed file doesn't abort the batch;
+            the summary reports uploaded vs. failed counts.
+        </p>
         <div class="arch-note">
             <strong>Per-file keys, per-file IVs.</strong> Each image and each thumbnail gets a fresh
             random 96-bit IV and its own CEK. A key compromise is scoped to a single file.
@@ -238,6 +244,12 @@ Browser                                    Server
             shows skeleton placeholders while crypto runs.
         </p>
         <p style="margin-top:12px">
+            <strong>Lightbox viewer:</strong> clicking a thumbnail opens the decrypted blob in a
+            fullscreen viewer — images scale to fit, videos play inline, PDFs render in an iframe.
+            Arrow keys and on-screen controls navigate the gallery; the same viewer handles deletion.
+            Blob URLs are revoked as you move between items so decrypted bytes don't accumulate in memory.
+        </p>
+        <p style="margin-top:12px">
             <strong>Session keys:</strong> the user's private key is restored from
             <code class="mono">sessionStorage</code> (PKCS8 bytes, cleared on tab close); workspace DEKs
             live in an in-memory map, re-unwrapped per page load via the private key.
@@ -264,17 +276,35 @@ Owner browser                              Server
 Invitee browser                            Server
 ────────────────                           ──────
 1. Enter code at /enter
-2. PBKDF2(code, salt) → code key
-3. POST code ──────────────────────────► verify Argon2id hash
-4.   ← wrapped_dek (if valid)            create scoped session
-5. Unwrap DEK locally with code key      (signed encrypted cookie)
-6. Browse within scope until expiry
+2. POST code ──────────────────────────► verify Argon2id hash
+3.   ← encrypted session cookie          (scope, permissions, expiry,
+     [raw_code + salt embedded]           raw code — all encrypted)
+4. GET /access ────────────────────────► middleware validates cookie,
+                                          checks scope per request
+5. PBKDF2(code, salt) → code key
+6. Unwrap DEK locally → decrypt titles,
+   thumbnails, blobs — browse in scope
+   until expiry or revocation
         </div>
         <p>
             The server verifies the code via its Argon2id hash but <strong>cannot derive the code key</strong> —
             it can hand out the wrapped DEK without ever being able to unwrap it. Scopes
             (workspace / collection / gallery) and a permission bitmask (view=1, upload=2, comment=4)
             are enforced server-side; expiry, max-uses, and revocation are checked on every request.
+        </p>
+        <p style="margin-top:12px">
+            <strong>Guest viewing:</strong> code-holders never create an account. The verified code issues
+            an encrypted, scope-pinned session cookie that carries the raw code and salt — the browser
+            re-derives the code key and re-unseals the DEK on every load. Dedicated
+            <code class="mono">/access/*</code> routes serve the viewer page, media lists, and ciphertext
+            streams behind <code class="mono">access_code:required</code> middleware, which re-validates
+            revocation/expiry/use-count and scope on every request. Out-of-scope media returns 403.
+        </p>
+        <p style="margin-top:12px">
+            <strong>Delivery:</strong> when a recipient email is recorded, the raw code is mailed once —
+            during the create request, the only moment it exists server-side. Mail failures are logged,
+            never fatal. Emailing a code sends it through mail infrastructure in plaintext, which is a
+            deliberate convenience trade-off: the code is still revocable and time-boxed.
         </p>
     </section>
 
@@ -355,8 +385,8 @@ Invitee browser                            Server
             </tr>
             <tr>
                 <td><code class="mono">workspace_access_codes</code></td>
-                <td>id (uuid pk), workspace_id, scope, permissions, expires_at, max_uses, use_count, revoked_at, code_hash (Argon2id)</td>
-                <td>wrapped_dek (sealed to code-derived key), label</td>
+                <td>id (uuid pk), workspace_id, scope, scope_id, permissions, expires_at, max_uses, use_count, revoked_at, recipient_email, label, code_hash (Argon2id), code_salt, code_prefix</td>
+                <td>wrapped_dek (sealed to code-derived key)</td>
             </tr>
             <tr>
                 <td><code class="mono">rekey_jobs</code></td>
@@ -394,8 +424,9 @@ Request ──► 1. Super Admin?  ──► metadata-level access only (never c
         <ul>
             <li><strong>Super Admin is explicitly denied content access</strong> — the policy returns <code class="mono">false</code>, not just absence of grants. Platform administration must never imply decryption capability; the admin holds no DEK and the code enforces it.</li>
             <li>Blob and thumbnail routes authorize <em>before</em> streaming — ciphertext is still access-controlled even though it's opaque.</li>
-            <li>Access-code sessions are signed, encrypted, scope-pinned cookies — validated on every request against expiry, revocation, use-count, and permission bits.</li>
+            <li>Access-code sessions are signed, encrypted, scope-pinned cookies — validated on every request against expiry, revocation, use-count, and permission bits. Guest <code class="mono">/access/*</code> routes additionally check that each media item sits inside the code's scope (workspace → collection → gallery chain), returning 403 otherwise.</li>
             <li>Uploads during a re-key return <code class="mono">423 Locked</code> — they'd be encrypted with the soon-stale DEK.</li>
+            <li><strong>Destructive actions require typing the entity's name</strong> — workspace, collection, gallery, and media deletion all use a GitHub-style confirm where the decrypted name must be re-typed. Since names are ciphertext, the check happens client-side against the freshly decrypted value.</li>
         </ul>
     </section>
 
@@ -448,6 +479,8 @@ Request ──► 1. Super Admin?  ──► metadata-level access only (never c
         <ul>
             <li><strong>No server-side search.</strong> Content is ciphertext; search/filter happens client-side on decrypted metadata. Accepted for privacy; viable because galleries are browsed, not searched.</li>
             <li><strong>Re-key invalidates access codes.</strong> The owner can't re-seal the DEK for codes it can't read. Regenerating codes is the honest cost of real revocation.</li>
+            <li><strong>Emailed codes travel in plaintext.</strong> Emailing a code to a recipient sends it through mail infrastructure unencrypted — accepted for convenience; the code remains revocable and time-boxed, and email delivery is opt-in per code.</li>
+            <li><strong>Code sessions embed the raw code.</strong> The guest session cookie contains the raw code (encrypted by the app key) so the browser can re-derive the code key without re-entry. A stolen cookie is equivalent to a stolen code — mitigated by Strict, HttpOnly, Secure flags and short TTL.</li>
             <li><strong>Password reset doesn't recover content.</strong> Resetting a password without the recovery code means the sealed private key is undecryptable. This is a feature — anything less would be a backdoor.</li>
             <li><strong>Comments are plaintext (for now).</strong> A documented exception — comments are low-sensitivity metadata and encrypting them adds per-viewer key-management complexity. Flagged for a future module.</li>
             <li><strong>Key persistence is sessionStorage, not IndexedDB.</strong> Keys clear on tab close — a deliberate trade of convenience for not persisting key material on disk.</li>
