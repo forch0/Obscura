@@ -175,7 +175,7 @@
                     const data = await response.json().catch(() => ({}));
                     throw new Error(data.message || 'Failed to generate code');
                 }
-                const { code_id, raw_code, code_salt } = await response.json();
+                const { code_id, raw_code, code_salt, email_sent } = await response.json();
 
                 statusEl.innerHTML = '<span class="spinner"></span> Sealing DEK…';
                 const { sealDekForCode } = await import('{{ Vite::asset("resources/js/crypto/code-key.js") }}');
@@ -208,7 +208,7 @@
                 const expiryLabel = new Date(Date.now() + (parseInt(document.getElementById('duration')?.value || 1440) * 60000)).toLocaleString();
                 form.innerHTML = `
                     <div style="text-align:center;padding:24px">
-                        <p class="text-caption text-secondary" style="margin-bottom:12px">Share this code — it won't be shown again</p>
+                        <p class="text-caption text-secondary" style="margin-bottom:12px">Share this code — it won't be shown again${email_sent ? '. A copy was emailed to the recipient.' : ''}</p>
                         <div class="code-display">${raw_code}</div>
                         <div style="margin-top:16px">
                             <button type="button" class="btn btn-primary btn-pill" onclick="navigator.clipboard.writeText('${raw_code}');this.textContent='Copied!'">Copy Code</button>

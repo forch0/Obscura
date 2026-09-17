@@ -79,12 +79,28 @@ class AccessCodeController extends Controller
             'expires_at' => $code->expires_at->toISOString(),
         ]);
 
+        // Email the raw code to the recipient (only chance — raw code is never stored)
+        $emailSent = false;
+        if ($code->recipient_email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($code->recipient_email)
+                    ->send(new \App\Mail\AccessCodeShared($generated['raw'], $workspace, $code));
+                $emailSent = true;
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Access code email failed', [
+                    'code_id' => $code->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         // Return the raw code ONCE — never stored on server
         if ($request->expectsJson()) {
             return response()->json([
                 'code_id' => $code->id,
                 'raw_code' => $generated['raw'],
                 'code_salt' => $generated['salt'],
+                'email_sent' => $emailSent,
             ], 201);
         }
 
