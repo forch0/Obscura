@@ -1022,7 +1022,7 @@ From `docs/modules/06-rekey-revoke.md` §9:
 
 ---
 
-## Post-Module Work � Guest Access Viewer & Rate Limiting
+## Post-Module Work � Guest Access Viewer & Rate Limiting
 
 **Status:** Implemented
 **Date:** 2026-09-17
@@ -1032,22 +1032,22 @@ From `docs/modules/06-rekey-revoke.md` §9:
 
 ### 1. Guest Access Viewer (bug fix + feature)
 
-The `POST /enter` redirect targeted `workspaces.show` behind `auth` middleware �
+The `POST /enter` redirect targeted `workspaces.show` behind `auth` middleware �
 code-holders (who have no account) were bounced to `/login`. Implemented the missing
 guest-facing viewer:
 
 | File | Status | Description |
 |---|---|---|
-| `app/Http/Controllers/AccessViewController.php` | Created | `show` � renders `access.view` with scoped galleries. `media` � media metadata per gallery, scope-checked. `blob`/`thumbnail` � ciphertext streams, scope-checked before serving. Out-of-scope ? 403. |
+| `app/Http/Controllers/AccessViewController.php` | Created | `show` � renders `access.view` with scoped galleries. `media` � media metadata per gallery, scope-checked. `blob`/`thumbnail` � ciphertext streams, scope-checked before serving. Out-of-scope ? 403. |
 | `app/Http/Middleware/ValidateAccessCodeSession.php` | Modified | Added `required` parameter mode: `access_code:required` denies when the session cookie is absent; without the param it remains a soft context attacher. |
 | `app/Services/AccessCode/CodeSessionService.php` | Modified | `issue()` now embeds `raw_code` + `code_salt` in the encrypted payload so the browser can re-derive the code key and unseal the DEK on every load. |
-| `app/Http/Controllers/AccessCodeEntryController.php` | Modified | Redirects to `access.view` instead of `workspaces.show`. Passes raw code to `issue()`. Logs `access_code.used` audit event (code as actor � invitees have no user record). |
+| `app/Http/Controllers/AccessCodeEntryController.php` | Modified | Redirects to `access.view` instead of `workspaces.show`. Passes raw code to `issue()`. Logs `access_code.used` audit event (code as actor � invitees have no user record). |
 | `resources/views/access/view.blade.php` | Created | Guest viewer: PBKDF2 code key ? unseal DEK ? decrypt workspace/gallery names ? gallery grid ? media grid ? lightbox (photo/video/PDF). |
 | `resources/views/layouts/guest.blade.php` | Created | Minimal public layout for code-holders: top bar, content area, shared footer. Flex column for sticky footer. |
 
-**New routes:** `GET /access`, `GET /access/galleries/{gallery}/media`, `GET /access/media/{medium}/blob`, `GET /access/media/{medium}/thumbnail` � all behind `access_code:required`.
+**New routes:** `GET /access`, `GET /access/galleries/{gallery}/media`, `GET /access/media/{medium}/blob`, `GET /access/media/{medium}/thumbnail` � all behind `access_code:required`.
 
-**New audit action:** `access_code.used` � recorded on every successful code entry, with scope + use_count context.
+**New audit action:** `access_code.used` � recorded on every successful code entry, with scope + use_count context.
 
 ---
 
@@ -1071,7 +1071,7 @@ via `throttle:<name>` middleware in `routes/web.php`:
 | `keypair` | `/api/keypair` GET+POST | 10/min | user ID |
 | `writes` | All other authenticated mutations (workspaces, collections, galleries, members) | 60/min | user ID |
 
-**Rationale:** `code-entry` is the highest-value brute-force target � access codes are
+**Rationale:** `code-entry` is the highest-value brute-force target � access codes are
 12-char Base32 (~60 bits, strong) but the endpoint costs an Argon2id verify per attempt,
 so 10/min bounds both guessing and CPU abuse. `login` is keyed by email+IP so an
 attacker can't lock out a specific account by spraying it, while still throttling
@@ -1079,6 +1079,65 @@ credential stuffing across accounts. Media reads are generous (240/min) since a
 gallery browse legitimately fetches dozens of thumbnails.
 
 **Verification:**
-- `php artisan route:list` � 70 routes register cleanly, throttles attached
-- `EnterCodeTest` + `LoginTest` � 17 tests pass with throttles active
+- `php artisan route:list` � 70 routes register cleanly, throttles attached
+- `EnterCodeTest` + `LoginTest` � 17 tests pass with throttles active
 - `access_code.used` audit entries confirmed in test run
+
+---
+
+## Post-Module Work — Workspace Members & Fixes
+
+**Status:** Implemented
+**Date:** 2026-09-17
+**Branch:** `features/workspace-members`
+**Tests:** 14 new (`WorkspaceMemberTest`)
+
+---
+
+### 1. Workspace Member Management (gap fix)
+
+The `workspace_members` table existed since Module 2 and gallery membership depends
+on it, but nothing ever created rows — there was no way to add a workspace member.
+Access codes only grant anonymous guest sessions, not membership.
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/WorkspaceMemberController.php` | ✅ Created | Owner-only (`authorize('update', $workspace)`). `index` — list members. `lookup` — single-email verification returning `user_id` + `public_key` for client-side DEK wrap; generic errors so it can't reveal registered emails. `store` — validates user has keypair, not owner, not already member; stores `wrapped_dek` + `accepted_at`. `update` — role change. `destroy` — removes member **and** their `gallery_members` rows in that workspace. Audit: `workspace.member_added`, `workspace.member_role_changed`, `workspace.member_removed`. |
+| `resources/views/workspaces/members.blade.php` | ✅ Created | Email input (not a user list — privacy). On submit: POST lookup → returns public key → browser RSA-OAEP-wraps the workspace DEK → POSTs `user_id` + `wrapped_dek`. Owner row + member count + remove buttons. Inline hints when lookup fails. |
+| `routes/web.php` | ✅ Modified | `GET/POST workspaces/{workspace}/members`, `POST members/lookup`, `PUT/DELETE members/{member}` — all `throttle:writes`, `auth` + `keypair` middleware. |
+| `resources/views/workspaces/show.blade.php` | ✅ Modified | Added "Members" button, owner-only via `@can('update', $workspace)`. |
+| `app/Http/Controllers/WorkspaceController.php` | ✅ Modified | `index` now includes workspaces where the user is a **member** (previously owner-only — members could never see the workspace). |
+
+**Privacy decision:** the add-member form originally rendered a dropdown of **all**
+registered users' emails — any workspace owner could enumerate the user base. Replaced
+with email input + throttled owner-only lookup that verifies one address at a time.
+
+---
+
+### 2. Gallery Members UI
+
+| File | Status | Description |
+|---|---|---|
+| `app/Http/Controllers/GalleryMemberController.php` | ✅ Modified | `index` passes `eligible` — workspace members not already in the gallery. |
+| `resources/views/galleries/members.blade.php` | ✅ Modified | UUID text field replaced with dropdown of eligible workspace members (by email). Member count + inline hint linking to workspace members page. |
+
+---
+
+### 3. Fixes Applied
+
+| Issue | Fix |
+|---|---|
+| Login broken: "key is not extractable" | `unsealPrivateKey` imported the RSA private key with `extractable=false`, then `storePrivateKey` called `exportKey('pkcs8')` to persist it to sessionStorage. Changed import to `extractable=true` (matches `restorePrivateKey`). Every sign-in threw before this fix. |
+
+---
+
+### 4. Tests
+
+| File | Status | Tests | Description |
+|---|---|---|---|
+| `tests/Feature/Workspaces/WorkspaceMemberTest.php` | ✅ Created | 14 | Members page renders, add member (wrapped_dek stored), reject no-keypair user, reject owner, reject duplicate, non-owner 403 (page + store), member sees workspace in index, removal cascades to gallery_members, lookup returns id+public_key, lookup hides unknown/keypairless (404), lookup rejects owner/existing member (422), lookup owner-only (403), members page does not expose other users' emails, audit logged. |
+
+**Verification:**
+- `php artisan route:list` — 8 member routes register cleanly — ✅
+- All 14 new tests pass; full suite 40 green (no regressions) — ✅
+- Blade templates compile (`view:cache`) — ✅
