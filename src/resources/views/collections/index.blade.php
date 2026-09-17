@@ -1,0 +1,85 @@
+@extends('layouts.app')
+
+@section('title', 'Collections — Obscura')
+
+@section('content')
+    <div class="page-header keep-row">
+        <h2 id="workspace-name"><span class="spinner"></span> Loading…</h2>
+        <x-button variant="primary" size="md" pill href="{{ route('collections.create', $workspace) }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14" style="vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Collection</x-button>
+    </div>
+
+    <div id="collections-list">
+        <div class="decrypt-status"><span class="spinner"></span> Decrypting…</div>
+    </div>
+
+    @if ($collections->isEmpty())
+        <x-empty-state title="No collections yet" message="Collections organize your galleries within a workspace." :action="route('collections.create', $workspace)" action-label="Create Collection" />
+    @endif
+@endsection
+
+@push('scripts')
+    @php
+        $wsData = array_merge(
+            $workspace->only(['id', 'encrypted_name', 'name_iv']),
+            ['wrapped_dek' => $workspace->wrappedDekFor(auth()->user())]
+        );
+        $collectionsData = $collections->map(fn($c) => $c->only(['id', 'encrypted_name', 'name_iv', 'encrypted_description', 'description_iv']));
+    @endphp
+    <script type="module">
+        const workspace = @json($wsData);
+        const collections = @json($collectionsData);
+        const workspaceId = workspace.id;
+
+        (async () => {
+            const { unsealDek, decryptName } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+            const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+            const { setWorkspaceDek, hasWorkspaceDek, getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
+
+            const privateKeyHandle = await restorePrivateKey();
+            if (!privateKeyHandle) {
+                document.getElementById('collections-list').innerHTML = '<p class="decrypt-status">Private key not loaded.</p>';
+                return;
+            }
+
+            let dekHandle;
+            if (hasWorkspaceDek(workspaceId)) {
+                dekHandle = getWorkspaceDek(workspaceId);
+            } else {
+                dekHandle = await unsealDek(workspace.wrapped_dek, privateKeyHandle);
+                setWorkspaceDek(workspaceId, dekHandle);
+            }
+
+            const wsName = await decryptName(workspace.encrypted_name, dekHandle, workspace.name_iv);
+            document.getElementById('workspace-name').textContent = wsName;
+
+            const grid = document.createElement('div');
+            grid.className = 'gallery-grid';
+
+            for (const c of collections) {
+                try {
+                    const name = await decryptName(c.encrypted_name, dekHandle, c.name_iv);
+                    const card = document.createElement('a');
+                    card.href = `/workspaces/${workspaceId}/collections/${c.id}`;
+                    card.className = 'card';
+                    card.style.textDecoration = 'none';
+                    card.style.color = 'hsl(var(--foreground))';
+                    card.innerHTML = `
+                        <h3>${name}</h3>
+                        <p class="text-caption text-secondary" style="margin-top:4px">Collection</p>
+                    `;
+                    grid.appendChild(card);
+                } catch (e) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `<h3>(decryption failed)</h3><p class="error-text">${e.message}</p>`;
+                    grid.appendChild(card);
+                }
+            }
+
+            document.getElementById('collections-list').innerHTML = '';
+            document.getElementById('collections-list').appendChild(grid);
+        })();
+    </script>
+@endpush

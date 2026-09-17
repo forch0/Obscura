@@ -1,0 +1,104 @@
+@extends('layouts.app')
+
+@section('title', 'Media — Obscura')
+
+@section('content')
+    <p class="text-caption" style="margin-bottom:8px"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
+    <div class="page-header keep-row">
+        <h2 id="media-title"><span class="spinner"></span> Decrypting…</h2>
+        <form id="delete-media-form" method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline">
+            @csrf
+            @method('DELETE')
+            <x-button type="submit" variant="danger" class="btn-responsive">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span class="btn-label">Delete</span>
+            </x-button>
+        </form>
+    </div>
+
+    <div id="media-viewer" style="text-align:center;padding:24px">
+        <span class="spinner"></span>
+        <p class="decrypt-status" style="margin-top:12px">Decrypting image…</p>
+    </div>
+    <div id="media-caption"></div>
+@endsection
+
+@push('scripts')
+    @php
+        $mediaData = $media->only(['id', 'encrypted_title', 'title_iv', 'encrypted_caption', 'caption_iv', 'mime_type']);
+        $wsData = [
+            'id' => $workspace->id,
+            'wrapped_dek' => $workspace->wrappedDekFor(auth()->user()),
+        ];
+    @endphp
+    <script type="module">
+        const media = @json($mediaData);
+        const workspace = @json($wsData);
+        const mediaId = media.id;
+        const workspaceId = workspace.id;
+
+        (async () => {
+            const { unsealDek } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
+            const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
+            const { hasWorkspaceDek, getWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
+            const { fetchAndDecryptMedia } = await import('{{ Vite::asset("resources/js/crypto/media-decrypt.js") }}');
+            const { decryptTextField } = await import('{{ Vite::asset("resources/js/crypto/media-encrypt.js") }}');
+
+            const privateKeyHandle = await restorePrivateKey();
+            if (!privateKeyHandle) {
+                document.getElementById('media-title').textContent = 'Private key not loaded';
+                return;
+            }
+
+            const dekHandle = hasWorkspaceDek(workspaceId)
+                ? getWorkspaceDek(workspaceId)
+                : await unsealDek(workspace.wrapped_dek, privateKeyHandle);
+
+            try {
+                let mediaTitle = '(untitled)';
+                if (media.encrypted_title) {
+                    mediaTitle = await decryptTextField(media.encrypted_title, media.title_iv, dekHandle);
+                }
+                document.getElementById('media-title').textContent = mediaTitle;
+
+                // GitHub-style delete: type the media title to confirm
+                document.getElementById('delete-media-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const ok = await ObscuraDialog.confirmDelete({
+                        entityType: 'media',
+                        name: mediaTitle,
+                        message: `This will permanently delete <strong>${mediaTitle}</strong>. This cannot be undone.`,
+                    });
+                    if (ok) e.target.submit();
+                });
+                if (media.encrypted_caption) {
+                    const cap = await decryptTextField(media.encrypted_caption, media.caption_iv, dekHandle);
+                    document.getElementById('media-caption').innerHTML = `<p class="text-caption text-secondary" style="text-align:center">${cap}</p>`;
+                }
+
+                const url = await fetchAndDecryptMedia(`/media/${mediaId}/blob`, dekHandle);
+                const viewer = document.getElementById('media-viewer');
+                const mime = media.mime_type || '';
+
+                if (mime.startsWith('image/')) {
+                    viewer.innerHTML = `<img src="${url}" style="max-width:100%;max-height:80vh;border-radius:8px" alt="">`;
+                } else if (mime.startsWith('video/')) {
+                    viewer.innerHTML = `<video src="${url}" controls playsinline style="max-width:100%;max-height:80vh;border-radius:8px"></video>`;
+                } else if (mime === 'application/pdf') {
+                    viewer.innerHTML = `
+                        <embed src="${url}" type="application/pdf" style="width:100%;height:75vh;border:1px solid hsl(var(--border));border-radius:8px">
+                        <p style="margin-top:12px"><a href="${url}" download class="btn btn-secondary btn-sm">Download PDF</a></p>`;
+                } else {
+                    viewer.innerHTML = `
+                        <div class="card" style="display:inline-block;padding:32px 48px;text-align:center">
+                            <p class="font-medium" style="margin-bottom:4px">${mime || 'Unknown type'}</p>
+                            <p class="text-caption" style="margin-bottom:16px">Decrypted — ready to download</p>
+                            <a href="${url}" download class="btn btn-primary">Download File</a>
+                        </div>`;
+                }
+            } catch (e) {
+                document.getElementById('media-viewer').innerHTML = `<p class="decrypt-status">Failed to decrypt: ${e.message}</p>`;
+            }
+        })();
+    </script>
+@endpush
