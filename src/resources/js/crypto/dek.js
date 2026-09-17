@@ -50,7 +50,8 @@ export async function generateAndSealDek(ownerPublicKeyB64) {
 
 /**
  * Unseal a DEK using the owner's private key handle.
- * Returns a non-extractable AES-GCM CryptoKey.
+ * Returns an extractable AES-GCM CryptoKey — extractable is required so the
+ * DEK can be re-wrapped for members, access codes, and re-key operations.
  */
 export async function unsealDek(sealedDekB64, ownerPrivateKeyHandle) {
     const sealed = base64Decode(sealedDekB64);
@@ -63,7 +64,7 @@ export async function unsealDek(sealedDekB64, ownerPrivateKeyHandle) {
         'raw',
         rawDek,
         { name: 'AES-GCM', length: 256 },
-        false, // not extractable
+        true, // extractable — needed for re-wrapping (access codes, members, rekey)
         ['encrypt', 'decrypt']
     );
 }
