@@ -18,13 +18,11 @@
             @csrf
             <x-input label="User ID" name="user_id" placeholder="UUID of workspace member" required />
             <div class="form-group">
-                <label for="role" class="form-label">Role</label>
-                <select id="role" name="role" class="form-input">
-                    <option value="viewer">Viewer — can view media</option>
-                    @if($gallery->isJoint())
-                        <option value="editor">Editor — can upload/edit media</option>
-                    @endif
-                </select>
+                <label class="form-label">Role</label>
+                <x-select name="role" id="role" selected="viewer" :options="collect([
+                    ['value' => 'viewer', 'label' => 'Viewer — can view media'],
+                    $gallery->isJoint() ? ['value' => 'editor', 'label' => 'Editor — can upload/edit media'] : null,
+                ])->filter()->values()->all()" />
             </div>
             <x-button type="submit" variant="primary">Add Member</x-button>
         </form>

@@ -12,12 +12,12 @@
         <form id="create-code-form">
             @csrf
             <div class="form-group">
-                <label for="scope" class="form-label">Scope</label>
-                <select id="scope" class="form-input">
-                    <option value="workspace">Entire workspace</option>
-                    <option value="collection" disabled>Collection (Module 4)</option>
-                    <option value="gallery" disabled>Gallery (Module 4)</option>
-                </select>
+                <label class="form-label">Scope</label>
+                <x-select name="scope" id="scope" selected="workspace" :options="[
+                    'workspace' => 'Entire workspace',
+                    'collection' => 'Collection',
+                    'gallery' => 'Gallery',
+                ]" disabled-options="collection,gallery" />
             </div>
             <div class="form-group">
                 <label class="form-label">Permissions</label>
@@ -28,14 +28,14 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="duration" class="form-label">Duration</label>
-                <select id="duration" class="form-input">
-                    <option value="60">1 hour</option>
-                    <option value="360">6 hours</option>
-                    <option value="1440" selected>24 hours</option>
-                    <option value="10080">7 days</option>
-                    <option value="43200">30 days</option>
-                </select>
+                <label class="form-label">Duration</label>
+                <x-select name="duration" id="duration" selected="1440" :options="[
+                    '60' => '1 hour',
+                    '360' => '6 hours',
+                    '1440' => '24 hours',
+                    '10080' => '7 days',
+                    '43200' => '30 days',
+                ]" />
             </div>
             <x-input label="Max Uses (0 = unlimited)" name="max_uses" type="number" :placeholder="0" />
             <x-input label="Label (optional)" name="label" placeholder="e.g., Sent to Alice" />

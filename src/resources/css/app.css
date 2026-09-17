@@ -368,6 +368,37 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
     margin: 4px -4px;
 }
 
+/* Select (form dropdown) variant */
+.select-dropdown { display: block; width: 100%; }
+
+.select-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.select-toggle .select-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select-menu {
+    left: 0;
+    right: 0;
+    min-width: 0;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.select-menu .dropdown-item.selected {
+    background: hsl(var(--muted));
+    font-weight: 500;
+}
+
 /* ============================================
    Cards
    ============================================ */

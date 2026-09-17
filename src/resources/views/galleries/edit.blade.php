@@ -13,12 +13,12 @@
             @csrf
             <x-input label="Gallery Name" name="name" required />
             <div class="form-group">
-                <label for="type" class="form-label">Type</label>
-                <select id="type" class="form-input">
-                    <option value="private" @if($gallery->type === 'private') selected @endif>Private — owner only</option>
-                    <option value="shared" @if($gallery->type === 'shared') selected @endif>Shared — workspace members can view</option>
-                    <option value="joint" @if($gallery->type === 'joint') selected @endif>Joint — editor members can upload/edit</option>
-                </select>
+                <label class="form-label">Type</label>
+                <x-select name="type" id="type" :selected="$gallery->type" :options="[
+                    'private' => 'Private — owner only',
+                    'shared' => 'Shared — workspace members can view',
+                    'joint' => 'Joint — editor members can upload/edit',
+                ]" />
             </div>
             <div class="form-group">
                 <label for="description" class="form-label">Description (optional)</label>
