@@ -56,7 +56,7 @@ export async function unsealPrivateKey(password, sealedPrivB64, saltB64, ivB64) 
         'pkcs8',
         privPkcs8,
         { name: 'RSA-OAEP', hash: 'SHA-256' },
-        false,
+        true,
         ['decrypt']
     );
 }
