@@ -36,8 +36,8 @@
     <p>
         Obscura is a zero-trust content vault — not just a gallery app. Photos,
         videos, documents, files: everything is encrypted in your browser before
-        it reaches the server. Upload, organize, share, and revoke — on storage
-        the server itself cannot read.
+        it reaches the server. Upload, organize, share, and revoke — all on a
+        server that cannot read it.
     </p>
     <div class="hero-ctas">
         <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Create Account</a>

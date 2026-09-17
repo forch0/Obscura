@@ -2,7 +2,7 @@
 
 @section('title', 'Enter Access Code — Obscura')
 @section('card-title', 'Enter access code')
-@section('card-subtitle', 'You\'ve been invited to view a private gallery')
+@section('card-subtitle', 'You\'ve been invited to view private content')
 
 @section('content')
     <form method="POST" action="{{ route('enter') }}">

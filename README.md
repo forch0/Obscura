@@ -1,6 +1,6 @@
 # Obscura
 
-A private, end-to-end encrypted gallery workspace built on Laravel. Owners organize photos and videos (with PDF support) into collections and galleries, and selectively share access using scoped, time-boxed, revocable access codes — no account needed for viewers. All media and content names are encrypted client-side (WebCrypto) — the server is blind to content.
+A zero-trust content storage platform built on Laravel. Owners organize any content — photos, videos, documents — into collections and galleries, and selectively share access using scoped, time-boxed, revocable access codes — no account needed for viewers. All content and names are encrypted client-side (WebCrypto) — the server is blind to content.
 
 ## Features
 
