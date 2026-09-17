@@ -93,21 +93,6 @@
         @media (max-width: 720px) {
             .menu-toggle { display: flex; }
         }
-
-        .public-footer {
-            text-align: center;
-            padding: 32px 24px;
-            border-top: 1px solid hsl(var(--border));
-            font-size: 0.8125rem;
-            color: hsl(var(--muted-foreground));
-        }
-
-        .public-footer a {
-            color: hsl(var(--foreground));
-            text-decoration: none;
-        }
-
-        .public-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -144,15 +129,7 @@
 
     @yield('content')
 
-    <footer class="public-footer">
-        <p>
-            <a href="{{ route('home') }}">Obscura</a> &middot;
-            <a href="{{ route('about') }}">About</a> &middot;
-            <a href="{{ route('architecture') }}">Architecture</a> &middot;
-            <a href="{{ route('use-cases') }}">Use Cases</a> &middot;
-            <a href="{{ route('enter') }}">Enter Code</a>
-        </p>
-    </footer>
+    <x-footer />
 
     <script>
         const toggle = document.getElementById('menu-toggle');

@@ -5,22 +5,22 @@
 @section('content')
     <div class="page-header">
         <h2 id="workspace-name"><span class="spinner"></span> Decrypting…</h2>
-        <div class="flex gap-2">
-            <x-button variant="secondary" href="{{ route('collections.index', $workspace) }}">Collections</x-button>
-            <x-button variant="secondary" href="{{ route('access-codes.index', $workspace) }}">Codes</x-button>
-            <x-button variant="secondary" href="{{ route('workspaces.edit', $workspace) }}">Rename</x-button>
-            <x-button variant="secondary" href="{{ route('workspaces.rekey', $workspace) }}">Re-key</x-button>
+        <div class="flex gap-2" style="flex-wrap:wrap">
+            <x-button variant="secondary" size="sm" href="{{ route('collections.index', $workspace) }}">Collections</x-button>
+            <x-button variant="secondary" size="sm" href="{{ route('access-codes.index', $workspace) }}">Codes</x-button>
+            <x-button variant="secondary" size="sm" href="{{ route('workspaces.edit', $workspace) }}">Rename</x-button>
+            <x-button variant="secondary" size="sm" href="{{ route('workspaces.rekey', $workspace) }}">Re-key</x-button>
             <form method="POST" action="{{ route('workspaces.destroy', $workspace) }}" style="display:inline" onsubmit="return confirm('Delete this workspace? All collections and galleries will be permanently lost.')">
                 @csrf
                 @method('DELETE')
-                <x-button type="submit" variant="danger">Delete</x-button>
+                <x-button type="submit" variant="danger" size="sm">Delete</x-button>
             </form>
         </div>
     </div>
 
     <div id="workspace-content">
         <div class="card">
-            <div class="flex items-center gap-4" style="flex-wrap:wrap">
+            <div class="ws-stats">
                 <div>
                     <p class="text-caption text-muted">DEK Version</p>
                     <p class="font-semibold">{{ $workspace->dek_version }}</p>
@@ -39,6 +39,15 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+<style>
+    .ws-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    @media (max-width: 480px) {
+        .ws-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    }
+</style>
+@endpush
 
 @push('scripts')
     @php

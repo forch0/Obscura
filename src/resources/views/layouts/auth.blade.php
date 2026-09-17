@@ -15,6 +15,7 @@
     </script>
 
     @vite(['resources/css/app.css'])
+    @yield('extra-styles')
 </head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px">
     <div style="width:100%;max-width:380px">
@@ -30,6 +31,7 @@
             @endif
             @yield('content')
         </div>
+        <x-footer />
     </div>
     @stack('scripts')
 </body>
