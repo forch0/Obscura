@@ -43,6 +43,10 @@
             <div class="app-content">
                 @yield('content')
             </div>
+
+            <footer class="app-footer">
+                <p>&copy; {{ date('Y') }} Obscura. All rights reserved.</p>
+            </footer>
         </main>
     </div>
 
