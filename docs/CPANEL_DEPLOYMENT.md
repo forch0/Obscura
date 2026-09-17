@@ -1,7 +1,7 @@
 # Obscura — cPanel / Shared-Hosting Deployment
 
 **Target:** standard shared PHP hosting (cPanel/DirectAdmin), MySQL, no Node.js on the server.
-**Example production:** `https://obscura44.fortunegabriel.de` on `~/public_html`.
+**Placeholders used throughout:** `domain.com` = your domain, `cpaneluser` = your cPanel account name, `~/public_html` = the app's web root.
 
 The core principle: **the server never runs npm or Vite.** All frontend assets are
 built locally and uploaded pre-compiled. The server only needs PHP 8.2+, MySQL,
@@ -58,13 +58,13 @@ The app files must never be directly web-accessible — `.env` in particular.
 APP_NAME=Obscura
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://obscura44.fortunegabriel.de
+APP_URL=https://domain.com
 
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=devtunec_lara120
-DB_USERNAME=your_db_user
+DB_DATABASE=cpaneluser_obscura
+DB_USERNAME=cpaneluser_dbuser
 DB_PASSWORD=your_db_password
 
 SESSION_DRIVER=file
