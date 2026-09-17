@@ -285,6 +285,90 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
 }
 
 /* ============================================
+   Dropdown menus (shadcn-style)
+   ============================================ */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle .caret {
+    display: inline-block;
+    margin-left: 6px;
+    opacity: 0.6;
+    transition: transform var(--transition);
+}
+
+.dropdown.open .dropdown-toggle .caret { transform: rotate(180deg); }
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 180px;
+    background: hsl(var(--popover));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 4px;
+    z-index: 50;
+    display: none;
+}
+
+.dropdown-menu-right { left: auto; right: 0; }
+
+.dropdown.open .dropdown-menu {
+    display: block;
+    animation: dropdown-in 120ms ease-out;
+}
+
+@keyframes dropdown-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dropdown-label {
+    padding: 8px 12px 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: hsl(var(--foreground));
+    background: none;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+
+.dropdown-item:hover { background: hsl(var(--muted)); }
+
+.dropdown-item.danger { color: hsl(var(--destructive)); }
+.dropdown-item.danger:hover { background: hsl(var(--destructive) / 0.08); }
+
+.dropdown-item:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dropdown-separator {
+    height: 1px;
+    background: hsl(var(--border));
+    margin: 4px -4px;
+}
+
+/* ============================================
    Cards
    ============================================ */
 

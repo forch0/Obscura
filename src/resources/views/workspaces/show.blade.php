@@ -8,12 +8,15 @@
         <div class="flex gap-2" style="flex-wrap:wrap">
             <x-button variant="secondary" size="sm" href="{{ route('collections.index', $workspace) }}">Collections</x-button>
             <x-button variant="secondary" size="sm" href="{{ route('access-codes.index', $workspace) }}">Codes</x-button>
-            <x-button variant="secondary" size="sm" href="{{ route('workspaces.edit', $workspace) }}">Rename</x-button>
-            <x-button variant="secondary" size="sm" href="{{ route('workspaces.rekey', $workspace) }}">Re-key</x-button>
-            <form method="POST" action="{{ route('workspaces.destroy', $workspace) }}" style="display:inline" onsubmit="return confirm('Delete this workspace? All collections and galleries will be permanently lost.')">
+            <x-dropdown label="Manage" variant="secondary" size="sm" align="right">
+                <x-dropdown.item href="{{ route('workspaces.edit', $workspace) }}">Rename</x-dropdown.item>
+                <x-dropdown.item href="{{ route('workspaces.rekey', $workspace) }}">Re-key</x-dropdown.item>
+                <x-dropdown.separator />
+                <x-dropdown.item danger type="submit" form="delete-workspace-form">Delete workspace</x-dropdown.item>
+            </x-dropdown>
+            <form id="delete-workspace-form" method="POST" action="{{ route('workspaces.destroy', $workspace) }}" style="display:none" onsubmit="return confirm('Delete this workspace? All collections and galleries will be permanently lost.')">
                 @csrf
                 @method('DELETE')
-                <x-button type="submit" variant="danger" size="sm">Delete</x-button>
             </form>
         </div>
     </div>
