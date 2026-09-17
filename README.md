@@ -1,123 +1,102 @@
 # Obscura
 
-A zero-trust content storage platform built on Laravel. Owners organize any content — photos, videos, documents — into collections and galleries, and selectively share access using scoped, time-boxed, revocable access codes — no account needed for viewers. All content and names are encrypted client-side (WebCrypto) — the server is blind to content.
+A zero-trust content storage platform built on Laravel. Store anything — photos, videos, documents — organized into workspaces, collections, and galleries, and share it with scoped, time-boxed, revocable access codes — no account needed for viewers.
+
+Everything is encrypted in the browser before it uploads. The server stores only ciphertext it cannot read — even the platform admin is locked out.
 
 ## Features
 
-- **End-to-end encryption** — media is encrypted in the browser before upload; the server stores only ciphertext. Workspace, collection, and gallery names, plus media titles/captions, are also encrypted with the workspace DEK.
-- **Photo, video & PDF support** — encrypted thumbnails, lightbox viewing, inline video playback, in-browser PDF rendering.
-- **Hierarchical organization** — Workspace → Collection → Gallery → Media.
-- **Gallery types** — `private` (owner only), `shared` (view access), `joint` (co-editors can upload/edit).
-- **Access codes** — scoped (workspace / collection / gallery), time-boxed, revocable, optionally emailed to a recipient. Code-holders browse a dedicated guest viewer — no account required.
-- **Hard revocation** — re-key rotates the workspace DEK, re-wraps every file key, and invalidates all access codes in one atomic transaction.
-- **Recovery codes** — printed at registration; password loss does not mean data loss.
-- **Rate limiting** — named throttles on login, registration, recovery, code entry, uploads, and every sensitive endpoint.
-- **Audit logging** — every sensitive action (code use, revocation, re-key, deletion) writes an audit record.
-- **UUID primary keys** — no sequential ID enumeration.
-- **Super Admin** — platform management (metadata only; cannot view encrypted content by design).
-- **Mobile-responsive** — monochrome, content-first UI with a custom component system (dropdowns, dialogs, toasts).
+- **End-to-end encryption** — files are encrypted in your browser before upload. Names, titles, and captions too. The server never sees plaintext.
+- **Any content type** — photos and videos are first-class (encrypted thumbnails, lightbox viewing, inline playback); documents and PDFs get the same treatment.
+- **Simple organization** — Workspace → Collection → Gallery → Media.
+- **Gallery types** — `private` (you only), `shared` (members view), `joint` (members can upload too).
+- **Workspace members** — add people you know by email; they get their own sealed copy of the workspace key. Editor or viewer roles.
+- **Access codes** — share without accounts. Scoped (workspace / collection / gallery), time-boxed, revocable, optionally emailed. Recipients get a guest viewer.
+- **Hard revocation** — re-key rotates the workspace key, re-locks every file, and kills every outstanding access code in one atomic step.
+- **Recovery code** — shown once at signup; losing your password doesn't mean losing your content.
+- **Rate limiting & audit logging** — sensitive endpoints throttled; sensitive actions recorded.
+- **UUIDs everywhere** — no guessable sequential IDs in URLs.
+- **Mobile-responsive** — monochrome, content-first UI.
+
+## How it works (the short version)
+
+```
+Your browser                                  Server
+──────────────                                ──────────────────
+ Your keypair                                  Stores only:
+   └─ private key sealed                        • encrypted file blobs
+      with your password                        • sealed (wrapped) keys
+                                                • encrypted names/titles
+ Workspace key (AES-256)                          • file sizes, types,
+   └─ locks each file's own key                     timestamps, IDs
+   └─ sealed separately for:
+        • each member's public key             Can never see:
+        • each access code                      • your content
+                                                • your keys
+                                                • names or captions
+```
+
+Full detail: [docs/USER_GUIDE.md](docs/USER_GUIDE.md) (plain-language, every flow) and [docs/architecture](docs/modules/README.md) module specs.
+
+## Using Obscura
+
+The complete walkthrough — registration, key generation, recovery codes, workspaces, members, collections, galleries, uploads, sharing codes, guest access, re-key, and a worked "Family Vault" example — lives in **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)**.
+
+Quick version:
+
+1. Register → generate your keypair → **save the recovery code**.
+2. Create a workspace → collections → galleries → upload.
+3. Share by adding a member (email) or generating an access code.
+4. Invitees open `/enter`, type the code, browse — no account needed.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Backend | Laravel, PHP 8.2+ |
-| Frontend | Blade + vanilla JS (delegated event handling, dynamic crypto imports) |
-| Styling | Custom CSS design system (CSS custom properties, shadcn-inspired monochrome) |
+| Backend | Laravel 11, PHP 8.2+ |
+| Frontend | Blade + vanilla JS (dynamic crypto imports) |
+| Styling | Custom CSS design system (CSS custom properties, monochrome) |
 | Crypto | WebCrypto API — AES-256-GCM, RSA-OAEP 2048, PBKDF2, Argon2id |
 | Database | SQLite (local dev), MySQL (cPanel production) |
-| Deployment | cPanel shared hosting |
+| Deployment | cPanel shared hosting — no Node.js on the server |
 
 ## Documentation
 
-All design and implementation docs live in `docs/`:
-
 | Document | Description |
 |---|---|
-| [PRD.md](docs/PRD.md) | Product requirements — goals, roles, encryption model, data model |
-| [WORKFLOWS.md](docs/WORKFLOWS.md) | End-to-end sequence diagrams (registration, sharing, upload, re-key, recovery) |
-| [CAPABILITIES.md](docs/CAPABILITIES.md) | Capabilities matrix — exactly what each role can and cannot do |
-| [DECISIONS.md](docs/DECISIONS.md) | Resolved design decisions (frontend, recovery, encryption, UUIDs) |
-| [UI-UX.md](docs/UI-UX.md) | Visual language, gallery views, responsive layout, component library |
-| [AUDIT_LOG.md](docs/AUDIT_LOG.md) | File-by-file build log with verification status and rate-limiting rationale |
+| [USER_GUIDE.md](docs/USER_GUIDE.md) | **Start here** — every user flow in plain language + worked example |
+| [CPANEL_DEPLOYMENT.md](docs/CPANEL_DEPLOYMENT.md) | Full shared-hosting deploy runbook + troubleshooting |
+| [PRD.md](docs/PRD.md) | Product requirements — goals, roles, encryption model |
+| [WORKFLOWS.md](docs/WORKFLOWS.md) | End-to-end sequence diagrams |
+| [CAPABILITIES.md](docs/CAPABILITIES.md) | What each role can and cannot do |
+| [DECISIONS.md](docs/DECISIONS.md) | Resolved design decisions and why |
+| [UI-UX.md](docs/UI-UX.md) | Visual language and component library |
+| [AUDIT_LOG.md](docs/AUDIT_LOG.md) | File-by-file build log with verification status |
 | [modules/README.md](docs/modules/README.md) | Implementation module index (6 build phases) |
-
-### Implementation modules
-
-| # | Module | Phase |
-|---|---|---|
-| 1 | [Auth & User Keypair](docs/modules/01-auth-keypair.md) | Foundation |
-| 2 | [Workspaces & DEK](docs/modules/02-workspaces-dek.md) | Core |
-| 3 | [Access Codes](docs/modules/03-access-codes.md) | Sharing |
-| 4 | [Collections & Galleries](docs/modules/04-collections-galleries.md) | Organization |
-| 5 | [Media Upload & Decrypt](docs/modules/05-media-encrypt.md) | Content |
-| 6 | [Re-key on Revoke](docs/modules/06-rekey-revoke.md) | Security |
-
-## Architecture at a Glance
-
-```
-Browser (WebCrypto)                    Server (Laravel)
-─────────────────────                  ─────────────────
-  User keypair (RSA-OAEP)               Stores only:
-    └─ private key sealed                 • ciphertext blobs
-       with password-derived key          • wrapped (sealed) keys
-                                          • encrypted names/titles
-  Workspace DEK (AES-GCM 256)            • plaintext operational metadata
-    └─ wraps each file's CEK               (mime_type, size, timestamps, IDs)
-    └─ sealed per principal:
-         • user public key
-         • access-code-derived key
-
-  Access code (PBKDF2-derived key)       Argon2id hash for verification
-    └─ unwraps workspace DEK             → guest /access viewer, scope-checked
-```
-
-The server never sees: plaintext media, DEKs, CEKs, private keys, raw access codes, or plaintext names/titles.
 
 ## Local Development
 
-The Laravel application lives in `src/`.
+The Laravel app lives in `src/`.
 
-### Prerequisites
-
-- PHP 8.2+
-- Composer
-- Node.js 18+ (for Vite asset building)
-- SQLite (default local DB)
-
-### Setup
+**Prerequisites:** PHP 8.2+, Composer, Node.js 18+ (for building assets), SQLite.
 
 ```bash
 cd src
 
-# Install PHP dependencies
 composer install
-
-# Install JS dependencies
 npm install
 
-# Configure environment
 cp .env.example .env
 php artisan key:generate
 
-# Set database to SQLite for local dev
-# In .env:
+# .env — use SQLite locally:
 #   DB_CONNECTION=sqlite
 #   DB_DATABASE=database/database.sqlite
 
-# Run migrations
 php artisan migrate
-
-# Build frontend assets
 npm run dev
-
-# Start the dev server
 php artisan serve
 ```
-
-### Default database
-
-Local development uses SQLite (`src/database/database.sqlite`). The production deployment on cPanel uses MySQL — switch `DB_CONNECTION` before deploying.
 
 ### Promote a Super Admin
 
@@ -125,33 +104,30 @@ Local development uses SQLite (`src/database/database.sqlite`). The production d
 php artisan admin:promote user@example.com
 ```
 
-## Deployment (cPanel)
+## Deployment (cPanel / shared hosting)
 
-1. Set `.env` to MySQL (production DB credentials).
-2. Build assets locally: `npm run build` — commit `public/build/`.
-3. Upload all files to the server (excluding `node_modules/`).
-4. Run `php artisan migrate` on the server.
-5. Ensure `storage/app/private/` is writable but not web-accessible.
-6. HTTPS is required (WebCrypto needs a secure context) — use cPanel AutoSSL.
+Short version: build assets locally (`npm run build`), upload the app, point the
+document root at `public/`, import the SQL schema, run the artisan setup commands.
 
-### cPanel-specific notes
+**The full runbook — upload rules, `.env`, database import, update workflow, and
+a troubleshooting table — is in [docs/CPANEL_DEPLOYMENT.md](docs/CPANEL_DEPLOYMENT.md).**
 
-- `QUEUE_CONNECTION=sync` — no persistent queue workers; re-key runs inline or via cron.
-- No Node.js on the server — build assets locally and deploy the built `public/build/` directory.
-- Encrypted blobs stored in `storage/app/private/` (outside web root), served via authz-gated PHP streaming.
-- Root `.htaccess` rewrites requests into `public/` for shared-host document root compatibility.
+Key facts:
+
+- No Node.js on the server — build `public/build/` locally and upload it whole.
+- HTTPS required — browser crypto only runs in secure contexts.
+- Encrypted blobs live in `storage/app/private/` (outside web root), streamed via authorization-gated routes.
 
 ## Security Model
 
-- **Encryption:** Hybrid E2EE. Media bytes + all human-readable names are encrypted client-side with AES-GCM. The workspace DEK is sealed per-principal via RSA-OAEP (account users) or PBKDF2-derived keys (access codes).
-- **Key hierarchy:** Workspace DEK → wraps per-file CEK → encrypts file blob. DEK is sealed for each authorized principal.
-- **Guest access:** Verified codes issue encrypted, scope-pinned session cookies — re-validated against revocation, expiry, and use-count on every request, including media streams.
-- **Rate limiting:** Credential endpoints, code entry, uploads, and re-key are all throttled — see `docs/AUDIT_LOG.md` for the limiter table.
-- **Revocation:** Soft revoke (blocks new access immediately) and hard revoke / re-key (new DEK, re-wrap all CEKs + encrypted names, invalidates all access codes).
-- **Recovery:** Printed recovery code seals a second copy of the private key. Password loss is recoverable without data loss.
-- **Super Admin:** Cannot view encrypted content — no DEK is ever sealed for them. Metadata management only.
+- **Hybrid E2EE:** file bytes and all human-readable names are encrypted client-side with AES-GCM. The workspace key is sealed separately for each member (RSA-OAEP) and each access code (a key derived from the code itself).
+- **Key hierarchy:** workspace key → wraps each file's own key → encrypts the file. Your private key is sealed with your password, plus a second copy sealed with your recovery code.
+- **Guests:** verified codes get encrypted, scope-pinned session cookies — re-checked against revocation, expiry, and use-count on every request, including file streams.
+- **Revocation:** soft (access denied instantly) and hard (re-key: new workspace key, everything re-locked, all codes invalidated).
+- **Recovery:** losing your password is recoverable with the printed recovery code. Losing both is not — that's the point.
+- **Super Admin:** manages metadata only. No workspace key is ever sealed for them — content stays unreadable by design.
 
-See [DECISIONS.md](docs/DECISIONS.md) for the full security rationale.
+See [DECISIONS.md](docs/DECISIONS.md) for the full rationale.
 
 ## License
 
