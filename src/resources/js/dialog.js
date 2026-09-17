@@ -65,13 +65,15 @@ export function alertDialog({ title = 'Notice', message = '' } = {}) {
 export function confirmDelete({ entityType = 'item', name = '', message = '' } = {}) {
     return new Promise((resolve) => {
         const card = buildOverlay(`
-            <h3 class="modal-title" style="color:hsl(var(--destructive))">Delete ${entityType}</h3>
+            <h3 class="modal-title">Delete ${entityType}</h3>
             <p class="modal-message">${message || `This will permanently delete <strong>${name}</strong>. This cannot be undone.`}</p>
-            <p class="modal-hint">Type <code class="modal-code">${name}</code> to confirm:</p>
-            <input type="text" class="form-input modal-input" id="modal-confirm-input" autocomplete="off" spellcheck="false">
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" data-modal-cancel>Cancel</button>
-                <button type="button" class="btn btn-danger" data-modal-confirm disabled>Delete</button>
+            <p class="modal-hint">To confirm, type <code class="modal-code">${name}</code> below:</p>
+            <input type="text" class="form-input modal-input" id="modal-confirm-input" autocomplete="off" spellcheck="false" placeholder="${name}">
+            <button type="button" class="btn btn-danger w-full modal-delete-btn" data-modal-confirm disabled>
+                I understand the consequences, delete this ${entityType}
+            </button>
+            <div class="modal-actions" style="margin-top:8px;justify-content:center">
+                <button type="button" class="btn btn-ghost" data-modal-cancel>Cancel</button>
             </div>
         `);
         pendingResolve = resolve;

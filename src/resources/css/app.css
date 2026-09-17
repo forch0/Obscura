@@ -567,6 +567,8 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
     transition: all 150ms ease;
     line-height: 1;
     white-space: nowrap;
+    height: 40px;
+    padding: 0 16px;
 }
 
 .btn:focus-visible {
@@ -1003,7 +1005,22 @@ select.form-input { cursor: pointer; }
     color: hsl(var(--foreground));
 }
 
-.modal-input { margin-bottom: 16px; }
+.modal-input { margin-bottom: 12px; }
+
+.modal-delete-btn {
+    white-space: normal;
+    height: auto;
+    min-height: 40px;
+    padding: 10px 16px;
+    line-height: 1.4;
+}
+
+.modal-delete-btn:disabled {
+    opacity: 0.35;
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--border));
+}
 
 .modal-actions {
     display: flex;
