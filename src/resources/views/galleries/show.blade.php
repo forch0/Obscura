@@ -42,7 +42,12 @@
         <div class="lightbox-toolbar">
             <span class="lightbox-counter" id="lb-counter"></span>
             <span class="lightbox-title" id="lb-title"></span>
-            <button class="lightbox-close" id="lb-close" aria-label="Close">&times;</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+                <button class="lightbox-close" id="lb-delete" aria-label="Delete" title="Delete media">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+                <button class="lightbox-close" id="lb-close" aria-label="Close">&times;</button>
+            </div>
         </div>
         <div class="lightbox-body">
             <button class="lightbox-nav lightbox-prev" id="lb-prev" aria-label="Previous">&#8249;</button>
@@ -153,7 +158,7 @@
                         <p class="detail">${fmtBytes(m.size)}</p>
                     </div>
                 `;
-                card.addEventListener('click', () => openLightbox(i));
+                card.addEventListener('click', () => openLightbox(mediaList.findIndex(x => x.id === m.id)));
                 grid.appendChild(card);
 
                 if (m.has_thumbnail) {
@@ -309,6 +314,23 @@
         document.getElementById('lb-close').addEventListener('click', closeLightbox);
         document.getElementById('lb-prev').addEventListener('click', () => showMedia(lbIndex - 1));
         document.getElementById('lb-next').addEventListener('click', () => showMedia(lbIndex + 1));
+        document.getElementById('lb-delete').addEventListener('click', async () => {
+            const m = mediaList[lbIndex];
+            if (!m || !confirm(`Delete "${mediaTitles[m.id] || 'this media'}"? This cannot be undone.`)) return;
+
+            const res = await fetch(`/media/${m.id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            });
+            if (!res.ok) { alert('Delete failed'); return; }
+
+            mediaList.splice(lbIndex, 1);
+            if (mediaList.length === 0) { closeLightbox(); location.reload(); return; }
+            await showMedia(Math.min(lbIndex, mediaList.length - 1));
+            // Rebuild grid card list
+            document.getElementById(`thumb-${m.id}`)?.closest('.gallery-card')?.remove();
+            document.getElementById('lb-counter').textContent = `${lbIndex + 1} / ${mediaList.length}`;
+        });
         lightbox.addEventListener('click', (e) => { if (e.target === lightbox || e.target.classList.contains('lightbox-body')) closeLightbox(); });
         document.addEventListener('keydown', (e) => {
             if (!lightbox.classList.contains('open')) return;
