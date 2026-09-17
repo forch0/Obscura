@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-public-key" content="{{ auth()->user()?->public_key ?? '' }}">
     <title>@yield('title', 'Obscura')</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <script>
         (function() {
@@ -22,14 +23,14 @@
 <body>
     <div class="app-shell">
         <nav class="app-sidebar">
-            <a href="{{ route('home') }}" class="sidebar-logo">Obscura</a>
+            <a href="{{ route('workspaces.index') }}" class="sidebar-logo">Obscura</a>
             <a href="{{ route('workspaces.index') }}" class="sidebar-link {{ request()->routeIs('workspaces.*') ? 'active' : '' }}">Workspaces</a>
             <a href="{{ route('enter') }}" class="sidebar-link {{ request()->routeIs('enter*') ? 'active' : '' }}">Enter Code</a>
         </nav>
 
         <main class="app-main">
             <div class="top-bar">
-                <a href="{{ route('home') }}" class="logo">Obscura</a>
+                <a href="{{ route('workspaces.index') }}" class="logo">Obscura</a>
                 <div style="flex:1"></div>
                 @auth
                     <form method="POST" action="{{ route('logout') }}" style="display:inline">

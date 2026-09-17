@@ -78,7 +78,7 @@ class LoginTest extends TestCase
         $response->assertRedirect(route('keygen'));
     }
 
-    public function test_user_with_keypair_is_redirected_home(): void
+    public function test_user_with_keypair_is_redirected_to_workspaces(): void
     {
         $user = User::factory()->withKeypair()->create([
             'email' => 'haskey@example.com',
@@ -90,7 +90,7 @@ class LoginTest extends TestCase
             'password' => 'SecurePassword123!',
         ]);
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('workspaces.index'));
     }
 
     public function test_user_can_logout(): void

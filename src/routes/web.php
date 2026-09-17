@@ -19,6 +19,12 @@ use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('workspaces.index')
+        : redirect()->route('home');
+});
+
+Route::get('/home', function () {
     return view('welcome');
 })->name('home');
 

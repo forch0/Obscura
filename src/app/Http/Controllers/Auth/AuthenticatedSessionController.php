@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('keygen');
         }
 
-        return redirect()->intended('/');
+        return redirect()->intended(route('workspaces.index'));
     }
 
     public function destroy(Request $request)
