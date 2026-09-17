@@ -58,7 +58,7 @@ document.getElementById('recover-step1').addEventListener('submit', async functi
 
         if (!verifyRes.ok) {
             const data = await verifyRes.json();
-            alert(data.message || 'Invalid recovery code or email.');
+            await ObscuraDialog.alertDialog({ title: 'Recovery failed', message: data.message || 'Invalid recovery code or email.' });
             btn.disabled = false;
             btn.textContent = 'Reset Password';
             return;
@@ -97,12 +97,12 @@ document.getElementById('recover-step1').addEventListener('submit', async functi
             window.location.href = '{{ route("home") }}';
         } else {
             const data = await resetRes.json();
-            alert(data.message || 'Failed to reset password.');
+            await ObscuraDialog.alertDialog({ title: 'Reset failed', message: data.message || 'Failed to reset password.' });
             btn.disabled = false;
             btn.textContent = 'Reset Password';
         }
     } catch (err) {
-        alert('An error occurred during recovery: ' + err.message);
+        await ObscuraDialog.alertDialog({ title: 'Error', message: 'An error occurred during recovery: ' + err.message });
         btn.disabled = false;
         btn.textContent = 'Reset Password';
     }

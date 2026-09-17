@@ -44,7 +44,13 @@
         const bar = document.querySelector('#rekey-bar .fill');
 
         btn?.addEventListener('click', async () => {
-            if (!confirm('This will invalidate all access codes. Continue?')) return;
+            const ok = await ObscuraDialog.confirmDialog({
+                title: 'Re-key workspace',
+                message: 'This generates a new DEK and re-wraps all keys. All existing access codes will be revoked.',
+                confirmLabel: 'Re-key',
+                danger: true,
+            });
+            if (!ok) return;
 
             btn.disabled = true;
             progress.style.display = '';

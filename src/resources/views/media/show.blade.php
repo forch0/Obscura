@@ -6,7 +6,7 @@
     <p class="text-caption" style="margin-bottom:8px"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
     <div class="page-header keep-row">
         <h2 id="media-title"><span class="spinner"></span> Decrypting…</h2>
-        <form method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline" onsubmit="return confirm('Delete this media?')">
+        <form id="delete-media-form" method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline">
             @csrf
             @method('DELETE')
             <x-button type="submit" variant="danger" class="btn-responsive">
@@ -55,12 +55,22 @@
                 : await unsealDek(workspace.wrapped_dek, privateKeyHandle);
 
             try {
+                let mediaTitle = '(untitled)';
                 if (media.encrypted_title) {
-                    document.getElementById('media-title').textContent =
-                        await decryptTextField(media.encrypted_title, media.title_iv, dekHandle);
-                } else {
-                    document.getElementById('media-title').textContent = '(untitled)';
+                    mediaTitle = await decryptTextField(media.encrypted_title, media.title_iv, dekHandle);
                 }
+                document.getElementById('media-title').textContent = mediaTitle;
+
+                // GitHub-style delete: type the media title to confirm
+                document.getElementById('delete-media-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const ok = await ObscuraDialog.confirmDelete({
+                        entityType: 'media',
+                        name: mediaTitle,
+                        message: `This will permanently delete <strong>${mediaTitle}</strong>. This cannot be undone.`,
+                    });
+                    if (ok) e.target.submit();
+                });
                 if (media.encrypted_caption) {
                     const cap = await decryptTextField(media.encrypted_caption, media.caption_iv, dekHandle);
                     document.getElementById('media-caption').innerHTML = `<p class="text-caption text-secondary" style="text-align:center">${cap}</p>`;

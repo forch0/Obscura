@@ -36,7 +36,7 @@
                 <span class="badge {{ $member->role === 'editor' ? 'badge-secondary' : '' }}">{{ ucfirst($member->role) }}</span>
             </div>
             <div class="flex gap-2">
-                <form method="POST" action="{{ route('galleries.members.destroy', [$collection, $gallery, $member]) }}" style="display:inline" onsubmit="return confirm('Remove this member?')">
+                <form method="POST" action="{{ route('galleries.members.destroy', [$collection, $gallery, $member]) }}" style="display:inline" class="remove-member-form" data-member="{{ $member->user->email }}">
                     @csrf
                     @method('DELETE')
                     <x-button type="submit" variant="danger" size="sm">Remove</x-button>
@@ -47,3 +47,20 @@
         <x-empty-state title="No members" message="Add workspace members to collaborate on this gallery." />
     @endforelse
 @endsection
+
+@push('scripts')
+<script type="module">
+    document.querySelectorAll('.remove-member-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const ok = await ObscuraDialog.confirmDialog({
+                title: 'Remove member',
+                message: `Remove ${form.dataset.member} from this gallery?`,
+                confirmLabel: 'Remove',
+                danger: true,
+            });
+            if (ok) form.submit();
+        });
+    });
+</script>
+@endpush

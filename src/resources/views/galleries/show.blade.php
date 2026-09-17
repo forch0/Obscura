@@ -16,10 +16,15 @@
                     <span class="btn-label">Members</span>
                 </x-button>
             @endif
-            <x-button variant="secondary" class="btn-responsive" href="{{ route('galleries.edit', [$collection, $gallery]) }}">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                <span class="btn-label">Edit</span>
-            </x-button>
+            <x-dropdown label="Manage" variant="secondary" size="sm" align="right">
+                <x-dropdown.item href="{{ route('galleries.edit', [$collection, $gallery]) }}">Edit</x-dropdown.item>
+                <x-dropdown.separator />
+                <x-dropdown.item danger id="delete-gallery-btn">Delete gallery</x-dropdown.item>
+            </x-dropdown>
+            <form id="delete-gallery-form" method="POST" action="{{ route('galleries.destroy', [$collection, $gallery]) }}" style="display:none">
+                @csrf
+                @method('DELETE')
+            </form>
             <x-button variant="primary" id="upload-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Upload</x-button>
@@ -122,6 +127,16 @@
             const name = await decryptName(gallery.encrypted_name, dekHandle, gallery.name_iv);
             document.getElementById('gallery-name').textContent = name;
             document.getElementById('gallery-type').innerHTML = `<span class="badge ${typeBadge[gallery.type] || ''}">${typeLabels[gallery.type] || gallery.type}</span>`;
+
+            // GitHub-style delete: type the gallery name to confirm
+            document.getElementById('delete-gallery-btn').addEventListener('click', async () => {
+                const ok = await ObscuraDialog.confirmDelete({
+                    entityType: 'gallery',
+                    name,
+                    message: `This will permanently delete <strong>${name}</strong> and all media inside it. This cannot be undone.`,
+                });
+                if (ok) document.getElementById('delete-gallery-form').submit();
+            });
             document.getElementById('upload-limits').textContent = `Up to ${MAX_FILES_PER_BATCH} files per batch · ${MAX_FILE_MB} MB each · ${MAX_TOTAL_MB} MB total`;
 
             if (gallery.encrypted_description) {
@@ -316,13 +331,21 @@
         document.getElementById('lb-next').addEventListener('click', () => showMedia(lbIndex + 1));
         document.getElementById('lb-delete').addEventListener('click', async () => {
             const m = mediaList[lbIndex];
-            if (!m || !confirm(`Delete "${mediaTitles[m.id] || 'this media'}"? This cannot be undone.`)) return;
+            if (!m) return;
+
+            const title = mediaTitles[m.id] || 'this media';
+            const ok = await ObscuraDialog.confirmDelete({
+                entityType: 'media',
+                name: title,
+                message: `This will permanently delete <strong>${title}</strong>. This cannot be undone.`,
+            });
+            if (!ok) return;
 
             const res = await fetch(`/media/${m.id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
             });
-            if (!res.ok) { alert('Delete failed'); return; }
+            if (!res.ok) { ObscuraDialog.toast('Delete failed', 'error'); return; }
 
             mediaList.splice(lbIndex, 1);
             if (mediaList.length === 0) { closeLightbox(); location.reload(); return; }

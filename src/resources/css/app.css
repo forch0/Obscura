@@ -939,6 +939,89 @@ select.form-input { cursor: pointer; }
 }
 
 /* ============================================
+   Modal dialogs (custom confirm/alert/delete)
+   ============================================ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    background: hsl(0 0% 0% / 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: modal-fade-in 120ms ease-out;
+}
+
+@keyframes modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 24px;
+    width: 100%;
+    max-width: 420px;
+    animation: modal-in 150ms ease-out;
+}
+
+@keyframes modal-in {
+    from { opacity: 0; transform: scale(0.97) translateY(6px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.modal-message {
+    font-size: 0.875rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.modal-hint {
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    margin-bottom: 8px;
+}
+
+.modal-code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.8125rem;
+    background: hsl(var(--muted));
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: hsl(var(--foreground));
+}
+
+.modal-input { margin-bottom: 16px; }
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Toast variants */
+.toast.error {
+    border-color: hsl(var(--destructive) / 0.4);
+    color: hsl(var(--destructive));
+}
+
+.toast.success {
+    border-color: hsl(var(--primary) / 0.3);
+}
+
+/* ============================================
    Toast
    ============================================ */
 

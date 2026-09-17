@@ -14,7 +14,7 @@
         })();
     </script>
 
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('extra-styles')
 </head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px">
@@ -33,6 +33,7 @@
         </div>
         <x-footer />
     </div>
+    <div class="toast-container" id="toasts"></div>
     @stack('scripts')
 </body>
 </html>

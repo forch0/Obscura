@@ -60,7 +60,7 @@
                                 <form method="POST" action="/workspaces/${workspaceId}/access-codes/${c.id}" style="display:inline">
                                     <input type="hidden" name="_method" value="DELETE">
                                     <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Revoke this code?')">Revoke</button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-revoke="${c.id}">Revoke</button>
                                 </form>
                             ` : ''}
                         </div>
@@ -68,6 +68,19 @@
                 `;
                 list.appendChild(card);
             }
+
+            // Delegate revoke clicks → custom confirm
+            list.addEventListener('click', async (e) => {
+                const btn = e.target.closest('[data-revoke]');
+                if (!btn) return;
+                const ok = await ObscuraDialog.confirmDialog({
+                    title: 'Revoke access code',
+                    message: 'This code will stop working immediately. Anyone using it will lose access.',
+                    confirmLabel: 'Revoke',
+                    danger: true,
+                });
+                if (ok) btn.closest('form').submit();
+            });
         }
     </script>
 @endpush

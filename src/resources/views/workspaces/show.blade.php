@@ -12,9 +12,9 @@
                 <x-dropdown.item href="{{ route('workspaces.edit', $workspace) }}">Rename</x-dropdown.item>
                 <x-dropdown.item href="{{ route('workspaces.rekey', $workspace) }}">Re-key</x-dropdown.item>
                 <x-dropdown.separator />
-                <x-dropdown.item danger type="submit" form="delete-workspace-form">Delete workspace</x-dropdown.item>
+                <x-dropdown.item danger id="delete-workspace-btn">Delete workspace</x-dropdown.item>
             </x-dropdown>
-            <form id="delete-workspace-form" method="POST" action="{{ route('workspaces.destroy', $workspace) }}" style="display:none" onsubmit="return confirm('Delete this workspace? All collections and galleries will be permanently lost.')">
+            <form id="delete-workspace-form" method="POST" action="{{ route('workspaces.destroy', $workspace) }}" style="display:none">
                 @csrf
                 @method('DELETE')
             </form>
@@ -83,6 +83,16 @@
 
             const name = await decryptName(workspace.encrypted_name, dekHandle, workspace.name_iv);
             document.getElementById('workspace-name').textContent = name;
+
+            // GitHub-style delete: type the workspace name to confirm
+            document.getElementById('delete-workspace-btn').addEventListener('click', async () => {
+                const ok = await ObscuraDialog.confirmDelete({
+                    entityType: 'workspace',
+                    name,
+                    message: `This will permanently delete <strong>${name}</strong> and all its collections, galleries, and media. This cannot be undone.`,
+                });
+                if (ok) document.getElementById('delete-workspace-form').submit();
+            });
         })();
     </script>
 @endpush
