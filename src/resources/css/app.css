@@ -1069,6 +1069,53 @@ select.form-input { cursor: pointer; }
 }
 
 /* ============================================
+   Permission chips (toggleable badges)
+   ============================================ */
+
+.perm-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.perm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background));
+    color: hsl(var(--muted-foreground));
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms ease;
+    user-select: none;
+}
+
+.perm-chip input { display: none; }
+
+.perm-chip:hover { border-color: hsl(var(--ring)); }
+
+.perm-chip:has(input:checked) {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary));
+}
+
+.perm-chip:has(input:checked) .perm-check { opacity: 1; width: 14px; }
+
+.perm-chip .perm-check {
+    display: inline-flex;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: all 150ms ease;
+}
+
+/* ============================================
    Utilities
    ============================================ */
 

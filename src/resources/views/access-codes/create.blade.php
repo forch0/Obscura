@@ -32,10 +32,22 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Permissions</label>
-                <div class="flex gap-4" style="margin-top:8px">
-                    <label><input type="checkbox" id="perm-view" checked> View</label>
-                    <label><input type="checkbox" id="perm-upload"> Upload</label>
-                    <label><input type="checkbox" id="perm-comment"> Comment</label>
+                <div class="perm-chips">
+                    <label class="perm-chip">
+                        <input type="checkbox" id="perm-view" checked>
+                        <svg class="perm-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+                        View
+                    </label>
+                    <label class="perm-chip">
+                        <input type="checkbox" id="perm-upload">
+                        <svg class="perm-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+                        Upload
+                    </label>
+                    <label class="perm-chip">
+                        <input type="checkbox" id="perm-comment">
+                        <svg class="perm-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+                        Comment
+                    </label>
                 </div>
             </div>
             <div class="form-group">
