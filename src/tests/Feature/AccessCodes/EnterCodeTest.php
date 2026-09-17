@@ -50,7 +50,7 @@ class EnterCodeTest extends TestCase
 
         $response = $this->post(route('enter'), ['code' => $this->rawCode]);
 
-        $response->assertRedirect(route('workspaces.show', $code->workspace_id));
+        $response->assertRedirect(route('access.view'));
         $response->assertCookie('access_code_session');
     }
 
@@ -86,7 +86,7 @@ class EnterCodeTest extends TestCase
 
         // First use succeeds
         $response = $this->post(route('enter'), ['code' => $this->rawCode]);
-        $response->assertRedirect(route('workspaces.show', $code->workspace_id));
+        $response->assertRedirect(route('access.view'));
 
         // Second use fails
         $response = $this->post(route('enter'), ['code' => $this->rawCode]);
@@ -101,5 +101,36 @@ class EnterCodeTest extends TestCase
 
         $code->refresh();
         $this->assertEquals(1, $code->use_count);
+    }
+
+    public function test_access_view_requires_session(): void
+    {
+        $this->get(route('access.view'))
+            ->assertRedirect(route('enter'));
+    }
+
+    public function test_access_view_renders_with_valid_session(): void
+    {
+        $code = $this->createCode();
+        $sessions = app(\App\Services\AccessCode\CodeSessionService::class);
+        $payload = $sessions->issue($code, $this->rawCode);
+
+        $this->withCookie($sessions->cookieName(), $sessions->encode($payload))
+            ->get(route('access.view'))
+            ->assertStatus(200);
+    }
+
+    public function test_out_of_scope_media_is_forbidden(): void
+    {
+        $code = $this->createCode(['scope' => 'gallery', 'scope_id' => 'other-gallery-id']);
+        $sessions = app(\App\Services\AccessCode\CodeSessionService::class);
+        $payload = $sessions->issue($code, $this->rawCode);
+
+        $otherGallery = \App\Models\Gallery::factory()->create();
+        $media = \App\Models\Media::factory()->create(['gallery_id' => $otherGallery->id]);
+
+        $this->withCookie($sessions->cookieName(), $sessions->encode($payload))
+            ->get("/access/media/{$media->id}/blob")
+            ->assertStatus(403);
     }
 }

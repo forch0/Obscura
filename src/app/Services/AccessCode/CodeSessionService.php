@@ -13,8 +13,10 @@ class CodeSessionService
     /**
      * Issue a scoped session token for a validated access code.
      * Returns the signed payload that gets stored as a cookie.
+     * raw_code + code_salt are included so the browser can re-derive the
+     * code key and unseal the wrapped DEK on subsequent page loads.
      */
-    public function issue(WorkspaceAccessCode $code): array
+    public function issue(WorkspaceAccessCode $code, ?string $rawCode = null): array
     {
         return [
             'code_id' => $code->id,
@@ -24,6 +26,8 @@ class CodeSessionService
             'permissions' => $code->permissions,
             'expires_at' => $code->expires_at->toISOString(),
             'issued_at' => now()->toISOString(),
+            'raw_code' => $rawCode,
+            'code_salt' => $code->code_salt,
         ];
     }
 

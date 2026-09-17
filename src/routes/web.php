@@ -44,6 +44,14 @@ Route::middleware('guest')->group(function () {
     // Invitee: enter access code
     Route::get('enter', [AccessCodeEntryController::class, 'create'])->name('enter');
     Route::post('enter', [AccessCodeEntryController::class, 'store']);
+
+    // Guest access-code viewer (requires valid code session cookie)
+    Route::middleware('access_code:required')->group(function () {
+        Route::get('access', [App\Http\Controllers\AccessViewController::class, 'show'])->name('access.view');
+        Route::get('access/galleries/{gallery}/media', [App\Http\Controllers\AccessViewController::class, 'media'])->name('access.media.index');
+        Route::get('access/media/{medium}/blob', [App\Http\Controllers\AccessViewController::class, 'blob'])->name('access.media.blob');
+        Route::get('access/media/{medium}/thumbnail', [App\Http\Controllers\AccessViewController::class, 'thumbnail'])->name('access.media.thumbnail');
+    });
 });
 
 Route::middleware('auth')->group(function () {

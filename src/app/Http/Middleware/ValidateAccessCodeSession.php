@@ -11,11 +11,14 @@ class ValidateAccessCodeSession
 {
     public function __construct(private CodeSessionService $sessions) {}
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, string $required = 'optional')
     {
         $token = $request->cookie($this->sessions->cookieName());
 
         if (!$token) {
+            if ($required === 'required') {
+                return $this->deny('Enter a valid access code to continue.');
+            }
             return $next($request); // not a code session; fall through
         }
 

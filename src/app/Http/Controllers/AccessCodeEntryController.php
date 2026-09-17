@@ -53,8 +53,9 @@ class AccessCodeEntryController extends Controller
         // Increment use count
         $matchedCode->incrementUseCount();
 
-        // Issue scoped session token
-        $payload = $this->sessions->issue($matchedCode);
+        // Issue scoped session token (raw code embedded so the browser can
+        // re-derive the code key and unseal the DEK on every page load)
+        $payload = $this->sessions->issue($matchedCode, $rawCode);
         $cookie = cookie(
             $this->sessions->cookieName(),
             $this->sessions->encode($payload),
@@ -62,9 +63,8 @@ class AccessCodeEntryController extends Controller
             null, null, true, true, false, 'Strict'
         );
 
-        // Redirect to the workspace view with the DEK unsealing data
-        return redirect()->route('workspaces.show', $matchedCode->workspace_id)
-            ->with('access_code', $rawCode)
+        // Redirect to the guest access viewer
+        return redirect()->route('access.view')
             ->cookie($cookie);
     }
 }
