@@ -23,7 +23,7 @@
         </p>
     </div>
     <p style="text-align:center;font-size:12px;color:#a3a3a3;margin:16px 0">
-        Obscura — private, encrypted galleries
+        Obscura — zero-trust content storage
     </p>
 </body>
 </html>

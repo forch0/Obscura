@@ -21,7 +21,7 @@ class WelcomeNotification extends Notification
             ->subject('Welcome to Obscura')
             ->greeting('Hello ' . $notifiable->name . ',')
             ->line('Your Obscura account has been created successfully.')
-            ->line('Obscura is a private, end-to-end encrypted gallery. Your images and content names are encrypted in your browser before they ever reach the server — even we cannot see them.')
+            ->line('Obscura is a zero-trust content storage platform. Your content and its names are encrypted in your browser before they ever reach the server — even we cannot see them.')
             ->line('**Next steps:**')
             ->line('• Complete your keypair generation (if you haven\'t already)')
             ->line('• Save your recovery code in a secure location')
