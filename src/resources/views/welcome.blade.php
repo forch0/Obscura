@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Obscura — Private Encrypted Galleries')
+@section('title', 'Obscura — Private Encrypted Photo & Video Galleries')
 
 @section('content')
 <style>
@@ -32,11 +32,12 @@
 @endauth
 
 <section class="hero">
-    <h1>Private, encrypted<br>image galleries.</h1>
+    <h1>Private, encrypted<br>photo &amp; video galleries.</h1>
     <p>
-        Obscura is an end-to-end encrypted gallery workspace. Your images are encrypted
-        in your browser before they reach the server. Upload, organize, share, and
-        revoke — all with zero-knowledge architecture.
+        Obscura is an end-to-end encrypted gallery workspace built for photos and
+        videos — with PDF support too. Everything is encrypted in your browser
+        before it reaches the server. Upload, organize, share, and revoke —
+        all with zero-knowledge architecture.
     </p>
     <div class="hero-ctas">
         <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Create Account</a>
@@ -46,7 +47,7 @@
 
 <section class="features">
     <h2>Everything encrypted. Nothing exposed.</h2>
-    <p class="subtitle">Every name, title, caption, and image is encrypted client-side. The server stores only ciphertext.</p>
+    <p class="subtitle">Every name, title, caption, image, video, and document is encrypted client-side. The server stores only ciphertext.</p>
 
     <div class="feature-grid">
         <div class="feature-card">
@@ -67,7 +68,11 @@
         </div>
         <div class="feature-card">
             <h3>Zero-Knowledge Server</h3>
-            <p>Names, descriptions, titles, captions, and image content are all encrypted. Even the Super Admin cannot decrypt your media.</p>
+            <p>Names, descriptions, titles, captions, and media content are all encrypted. Even the Super Admin cannot decrypt your files.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Photos, Video &amp; PDFs</h3>
+            <p>Photos and videos are first-class — encrypted thumbnails, lightbox viewing, inline playback. PDFs get the same treatment with in-browser viewing.</p>
         </div>
         <div class="feature-card">
             <h3>Self-Hostable</h3>

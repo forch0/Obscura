@@ -39,7 +39,7 @@
 
 <section class="uc-hero">
     <h1>Use Cases</h1>
-    <p>How teams and individuals use Obscura for private, encrypted image sharing.</p>
+    <p>How teams and individuals use Obscura for private, encrypted photo and video sharing — with PDF support for documents.</p>
 </section>
 
 <section class="uc-section">
@@ -83,12 +83,13 @@
         <h2>Confidential Evidence</h2>
         <p>
             Share sensitive visual evidence — site inspections, product photos,
-            documentation scans — without the content touching an unencrypted server.
+            scanned documents and PDFs — without the content touching an unencrypted server.
             Access codes can be limited to a single use or a few hours,
             and audit logs track every view.
         </p>
         <ul>
             <li>End-to-end encrypted — server stores only ciphertext</li>
+            <li>Photos, videos, and PDF documents all supported</li>
             <li>Single-use or time-limited access codes</li>
             <li>Audit trail for every action</li>
             <li>No plaintext on the server — reduces breach exposure</li>
@@ -116,10 +117,11 @@
         <span class="tag">Journalists &amp; Researchers</span>
         <h2>Source Material</h2>
         <p>
-            Receive sensitive photos, documents, and field imagery from sources
+            Receive sensitive photos, video, documents, and field imagery from sources
             without creating a plaintext trail. Sources upload via a joint gallery
             or a scoped access code — no account needed, no identifying metadata
-            stored in the clear. When the story is done, revoke access and re-key.
+            stored in the clear. PDFs are viewable in-browser. When the story is done,
+            revoke access and re-key.
         </p>
         <ul>
             <li>Sources upload without accounts — just an access code</li>

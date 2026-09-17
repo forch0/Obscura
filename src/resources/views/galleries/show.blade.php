@@ -39,7 +39,7 @@
     <h3 style="margin-top:32px;margin-bottom:16px">Media</h3>
     <div id="media-grid" class="gallery-grid"></div>
     <div id="media-empty" style="display:none">
-        <x-empty-state title="No media yet" message="Upload encrypted images to this gallery." />
+        <x-empty-state title="No media yet" message="Upload encrypted photos, videos, or PDFs to this gallery." />
     </div>
 
     {{-- Lightbox --}}

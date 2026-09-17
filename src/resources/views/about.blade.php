@@ -9,7 +9,7 @@
     <div style="padding:48px 0 32px;border-bottom:1px solid hsl(var(--border));margin-bottom:32px">
         <h1 style="margin-bottom:12px">About Obscura</h1>
         <p style="font-size:1.125rem;color:hsl(var(--muted-foreground));line-height:1.6">
-            A private, end-to-end encrypted image gallery platform.
+            A private, end-to-end encrypted gallery workspace for photos and videos — with PDF support.
             Your content is encrypted in the browser — the server stores only ciphertext.
         </p>
     </div>
@@ -19,13 +19,14 @@
         <h2 style="margin-bottom:16px">What is Obscura?</h2>
         <p class="text-secondary" style="line-height:1.7;margin-bottom:16px">
             Obscura is a self-hosted gallery workspace built on a zero-knowledge architecture.
-            Upload images, organize them into collections and galleries, and share them with
-            scoped access codes — all without the server ever seeing your content.
+            Upload photos and videos (plus PDF documents), organize them into collections
+            and galleries, and share them with scoped access codes — all without the
+            server ever seeing your content.
         </p>
         <p class="text-secondary" style="line-height:1.7">
             Every workspace has its own AES-256 encryption key, generated in your browser.
-            That key is sealed to your RSA public key before it touches the server. Image files
-            get their own per-file keys, which are wrapped by the workspace key. Names, titles,
+            That key is sealed to your RSA public key before it touches the server. Every file
+            gets its own per-file key, which is wrapped by the workspace key. Names, titles,
             captions — all encrypted before storage.
         </p>
     </section>
@@ -36,7 +37,7 @@
         <div style="display:grid;gap:12px">
             <div class="card">
                 <h3 style="margin-bottom:8px">End-to-End Encrypted Media</h3>
-                <p class="text-caption">Each image is encrypted with a unique AES-256-GCM key before upload. The file key is sealed with the workspace key. The server stores only ciphertext blobs — it never sees plaintext image data. Thumbnails are generated and encrypted in the browser. On view, ciphertext streams to the browser and decrypts locally.</p>
+                <p class="text-caption">Each photo, video, or PDF is encrypted with a unique AES-256-GCM key before upload. The file key is sealed with the workspace key. The server stores only ciphertext blobs — it never sees plaintext content. Thumbnails are generated and encrypted in the browser. On view, ciphertext streams to the browser and decrypts locally into a lightbox — photos full-screen, video with inline playback, PDFs in an embedded viewer.</p>
             </div>
             <div class="card">
                 <h3 style="margin-bottom:8px">Workspace Encryption Keys</h3>
@@ -117,7 +118,7 @@
                 <h3 style="margin-bottom:12px">Cannot see</h3>
                 <ul class="text-secondary" style="padding-left:20px;font-size:0.875rem;list-style:disc;line-height:1.8">
                     <li>Workspace, collection, and gallery names</li>
-                    <li>Image content, titles, and captions</li>
+                    <li>Photo, video, and PDF content — plus titles and captions</li>
                     <li>Workspace encryption keys (DEKs) and file keys (CEKs)</li>
                     <li>Raw access codes (only Argon2id hashes stored)</li>
                     <li>Private keys (never leave the browser)</li>
