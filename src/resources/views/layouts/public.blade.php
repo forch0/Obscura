@@ -96,7 +96,7 @@
         }
     </style>
 </head>
-<body>
+<body style="display:flex;flex-direction:column;min-height:100vh">
     <nav class="public-nav">
         <a href="{{ route('home') }}" class="logo">Obscura</a>
         <div class="links">
@@ -128,7 +128,9 @@
         @endguest
     </div>
 
-    @yield('content')
+    <div style="flex:1">
+        @yield('content')
+    </div>
 
     <x-footer />
 

@@ -18,13 +18,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('extra-styles')
 </head>
-<body>
+<body style="display:flex;flex-direction:column;min-height:100vh">
     <div class="top-bar" style="justify-content:space-between">
         <a href="{{ route('home') }}" class="logo">Obscura</a>
         <span class="text-caption text-secondary">Shared access</span>
     </div>
 
-    <main class="app-content" style="max-width:960px">
+    <main class="app-content" style="max-width:960px;flex:1">
         @yield('content')
     </main>
 
