@@ -112,6 +112,7 @@
                 if (!dekRes.ok) throw new Error('Failed to store sealed DEK');
 
                 statusEl.innerHTML = '';
+                const expiryLabel = new Date(Date.now() + (parseInt(document.getElementById('duration')?.value || 1440) * 60000)).toLocaleString();
                 form.innerHTML = `
                     <div style="text-align:center;padding:24px">
                         <p class="text-caption text-secondary" style="margin-bottom:12px">Share this code — it won't be shown again</p>
@@ -119,7 +120,7 @@
                         <div style="margin-top:16px">
                             <button type="button" class="btn btn-primary btn-pill" onclick="navigator.clipboard.writeText('${raw_code}');this.textContent='Copied!'">Copy Code</button>
                         </div>
-                        <p class="text-caption text-muted" style="margin-top:12px">Expires: ${new Date(Date.now() + ${parseInt(document.getElementById('duration')?.value || 1440)} * 60000).toLocaleString()}</p>
+                        <p class="text-caption text-muted" style="margin-top:12px">Expires: ${expiryLabel}</p>
                     </div>
                 `;
             } catch (e) {
