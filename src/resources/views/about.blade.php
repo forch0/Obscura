@@ -3,10 +3,26 @@
 @section('title', 'About — Obscura')
 
 @section('content')
-<div style="max-width:720px;margin:0 auto">
+<style>
+    .about-wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+    @media (max-width: 640px) {
+        .about-wrap { padding: 0 16px; }
+        .about-wrap > section { margin-bottom: 32px !important; }
+        .about-hero { padding: 32px 0 20px !important; margin-bottom: 24px !important; }
+        .about-hero h1 { font-size: 1.625rem !important; }
+        .about-hero p { font-size: 1rem !important; }
+        .about-wrap h2 { font-size: 1.25rem !important; }
+        .about-wrap .card { padding: 16px !important; }
+        .gallery-types { grid-template-columns: 1fr !important; }
+        .about-wrap table { font-size: 0.8125rem !important; min-width: 0 !important; }
+        .about-wrap table th, .about-wrap table td { padding: 8px 6px 8px 0 !important; }
+        .about-footer { padding: 24px 0 !important; }
+    }
+</style>
+<div class="about-wrap">
 
     {{-- Hero --}}
-    <div style="padding:48px 0 32px;border-bottom:1px solid hsl(var(--border));margin-bottom:32px">
+    <div class="about-hero" style="padding:48px 0 32px;border-bottom:1px solid hsl(var(--border));margin-bottom:32px">
         <h1 style="margin-bottom:12px">About Obscura</h1>
         <p style="font-size:1.125rem;color:hsl(var(--muted-foreground));line-height:1.6">
             A zero-trust content storage platform — not just a gallery. Photos, videos,
@@ -139,7 +155,7 @@
     {{-- Gallery types --}}
     <section style="margin-bottom:40px">
         <h2 style="margin-bottom:24px">Gallery Types</h2>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        <div class="gallery-types" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
             <div class="card" style="text-align:center">
                 <p class="font-semibold" style="margin-bottom:4px">Private</p>
                 <p class="text-caption">Owner only. No members, no access codes.</p>
@@ -278,7 +294,7 @@
     </section>
 
     {{-- Footer --}}
-    <div style="text-align:center;padding:32px 0;border-top:1px solid hsl(var(--border))">
+    <div class="about-footer" style="text-align:center;padding:32px 0;border-top:1px solid hsl(var(--border))">
         <p class="text-caption">
             <a href="{{ route('home') }}" style="color:hsl(var(--foreground));text-decoration:none">Obscura</a> &middot;
             <a href="{{ route('workspaces.index') }}" style="color:hsl(var(--muted-foreground));text-decoration:none">Dashboard</a> &middot;
