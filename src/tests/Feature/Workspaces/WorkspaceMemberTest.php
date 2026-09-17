@@ -138,6 +138,75 @@ class WorkspaceMemberTest extends TestCase
         $this->assertDatabaseMissing('gallery_members', ['id' => $gm->id]);
     }
 
+    public function test_lookup_returns_user_id_and_public_key(): void
+    {
+        ['owner' => $owner, 'workspace' => $workspace] = $this->makeWorkspace();
+        $member = User::factory()->withKeypair()->create();
+
+        $response = $this->actingAs($owner)->postJson(
+            route('workspaces.members.lookup', $workspace),
+            ['email' => $member->email]
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson(['user_id' => $member->id, 'public_key' => $member->public_key]);
+    }
+
+    public function test_lookup_hides_unknown_or_keypairless_users(): void
+    {
+        ['owner' => $owner, 'workspace' => $workspace] = $this->makeWorkspace();
+        $noKeypair = User::factory()->create();
+
+        $this->actingAs($owner)->postJson(
+            route('workspaces.members.lookup', $workspace),
+            ['email' => 'nobody@example.com']
+        )->assertStatus(404);
+
+        $this->actingAs($owner)->postJson(
+            route('workspaces.members.lookup', $workspace),
+            ['email' => $noKeypair->email]
+        )->assertStatus(404);
+    }
+
+    public function test_lookup_rejects_owner_and_existing_member(): void
+    {
+        ['owner' => $owner, 'workspace' => $workspace] = $this->makeWorkspace();
+        $member = User::factory()->withKeypair()->create();
+        WorkspaceMember::create(['workspace_id' => $workspace->id, 'user_id' => $member->id, 'role' => 'viewer']);
+
+        $this->actingAs($owner)->postJson(
+            route('workspaces.members.lookup', $workspace),
+            ['email' => $owner->email]
+        )->assertStatus(422);
+
+        $this->actingAs($owner)->postJson(
+            route('workspaces.members.lookup', $workspace),
+            ['email' => $member->email]
+        )->assertStatus(422);
+    }
+
+    public function test_lookup_is_owner_only(): void
+    {
+        ['workspace' => $workspace] = $this->makeWorkspace();
+        $stranger = User::factory()->withKeypair()->create();
+
+        $this->actingAs($stranger)->postJson(
+            route('workspaces.members.lookup', $workspace),
+            ['email' => 'someone@example.com']
+        )->assertStatus(403);
+    }
+
+    public function test_members_page_does_not_expose_other_users(): void
+    {
+        ['owner' => $owner, 'workspace' => $workspace] = $this->makeWorkspace();
+        $otherUser = User::factory()->withKeypair()->create();
+
+        $this->actingAs($owner)
+            ->get(route('workspaces.members', $workspace))
+            ->assertStatus(200)
+            ->assertDontSee($otherUser->email);
+    }
+
     public function test_member_management_logs_audit(): void
     {
         ['owner' => $owner, 'workspace' => $workspace] = $this->makeWorkspace();

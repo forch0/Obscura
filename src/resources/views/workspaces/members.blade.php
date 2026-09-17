@@ -13,38 +13,22 @@
 
     <div class="card" style="max-width:560px;margin-bottom:24px">
         <h3>Add Member</h3>
-        @if($eligible->isNotEmpty())
-            <p class="text-caption text-secondary" style="margin-bottom:16px">The user must have registered and generated their keypair.</p>
-            <form method="POST" action="{{ route('workspaces.members.store', $workspace) }}" id="add-member-form">
-                @csrf
-                <input type="hidden" name="wrapped_dek" id="wrapped_dek">
-                <div class="form-group">
-                    <label class="form-label">User</label>
-                    <x-select name="user_id" id="user_id" :options="$eligible->map(fn($u) => [
-                        'value' => $u->id,
-                        'label' => $u->email,
-                    ])->all()" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Role</label>
-                    <x-select name="role" id="role" selected="viewer" :options="[
-                        ['value' => 'viewer', 'label' => 'Viewer — can view media'],
-                        ['value' => 'editor', 'label' => 'Editor — can upload/edit media'],
-                    ]" />
-                </div>
-                <x-button type="submit" variant="primary">Add Member</x-button>
-                <p id="add-member-status" class="text-caption text-secondary" style="margin-top:8px"></p>
-            </form>
-        @else
-            <div style="margin-top:12px;padding:14px 16px;background:hsl(var(--secondary));border-radius:8px">
-                <p class="text-sm font-medium">No one available to add right now.</p>
-                <p class="text-caption text-secondary" style="margin-top:4px">
-                    Everyone with a keypair is already a member. To add someone new, they need to
-                    <a href="{{ route('register') }}" style="color:hsl(var(--primary))">register</a> and generate their keypair first —
-                    or share an <a href="{{ route('access-codes.index', $workspace) }}" style="color:hsl(var(--primary))">access code</a> for view-only guest access instead.
-                </p>
+        <p class="text-caption text-secondary" style="margin-bottom:16px">Enter the email of the person to add. They must have registered and generated their keypair.</p>
+        <form method="POST" action="{{ route('workspaces.members.store', $workspace) }}" id="add-member-form">
+            @csrf
+            <input type="hidden" name="user_id" id="user_id">
+            <input type="hidden" name="wrapped_dek" id="wrapped_dek">
+            <x-input label="Email" name="email" type="email" placeholder="their@email.com" required />
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <x-select name="role" id="role" selected="viewer" :options="[
+                    ['value' => 'viewer', 'label' => 'Viewer — can view media'],
+                    ['value' => 'editor', 'label' => 'Editor — can upload/edit media'],
+                ]" />
             </div>
-        @endif
+            <x-button type="submit" variant="primary">Add Member</x-button>
+            <p id="add-member-status" class="text-caption text-secondary" style="margin-top:8px"></p>
+        </form>
     </div>
 
     <h3 style="margin-bottom:12px">Members ({{ $members->count() + 1 }})</h3>
@@ -72,27 +56,43 @@
 @endsection
 
 @push('scripts')
-    @if($eligible->isNotEmpty())
     <script type="module">
         const workspaceId = '{{ $workspace->id }}';
         const wrappedDekForOwner = @json($workspace->wrappedDekFor(auth()->user()));
-        const publicKeys = @json($eligible->pluck('public_key', 'id'));
+        const lookupUrl = '{{ route('workspaces.members.lookup', $workspace) }}';
+        const csrf = document.querySelector('meta[name=csrf-token]').content;
         const form = document.getElementById('add-member-form');
         const statusEl = document.getElementById('add-member-status');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const userId = document.getElementById('user_id').value;
-            const publicKeyB64 = publicKeys[userId];
-            if (!userId || !publicKeyB64) {
-                statusEl.textContent = 'Select a user first.';
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                statusEl.textContent = 'Enter their email address.';
                 return;
             }
 
-            statusEl.innerHTML = '<span class="spinner"></span> Wrapping workspace key…';
+            statusEl.innerHTML = '<span class="spinner"></span> Looking up user…';
 
             try {
+                const res = await fetch(lookupUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    statusEl.textContent = data.error ?? 'Lookup failed.';
+                    return;
+                }
+
+                statusEl.innerHTML = '<span class="spinner"></span> Wrapping workspace key…';
+
                 const { unsealDek, importPublicKey } = await import('{{ Vite::asset("resources/js/crypto/dek.js") }}');
                 const { restorePrivateKey } = await import('{{ Vite::asset("resources/js/crypto/session.js") }}');
                 const { getWorkspaceDek, setWorkspaceDek } = await import('{{ Vite::asset("resources/js/crypto/workspace-session.js") }}');
@@ -107,9 +107,10 @@
                 }
 
                 const rawDek = await crypto.subtle.exportKey('raw', dek);
-                const pub = await importPublicKey(publicKeyB64);
+                const pub = await importPublicKey(data.public_key);
                 const wrapped = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, pub, rawDek);
 
+                document.getElementById('user_id').value = data.user_id;
                 document.getElementById('wrapped_dek').value = base64Encode(new Uint8Array(wrapped));
                 form.submit();
             } catch (err) {
@@ -117,5 +118,4 @@
             }
         });
     </script>
-    @endif
 @endpush

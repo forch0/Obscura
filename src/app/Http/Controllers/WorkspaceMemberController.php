@@ -21,16 +21,42 @@ class WorkspaceMemberController extends Controller
 
         $members = $workspace->members()->with('user')->get();
 
-        $eligible = User::whereNotNull('public_key')
-            ->where('id', '!=', $workspace->owner_id)
-            ->whereNotIn('id', $members->pluck('user_id'))
-            ->orderBy('email')
-            ->get(['id', 'email', 'public_key']);
-
         return view('workspaces.members', [
             'workspace' => $workspace,
             'members' => $members,
-            'eligible' => $eligible,
+        ]);
+    }
+
+    /**
+     * Look up a single user by email so the owner can wrap the DEK for them.
+     * Deliberately returns generic errors — this must not reveal whether an
+     * email is registered unless the lookup is valid for this workspace.
+     */
+    public function lookup(Request $request, Workspace $workspace)
+    {
+        $this->authorize('update', $workspace);
+
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user || !$user->public_key) {
+            return response()->json(['error' => 'No account found for that email — they may need to register and generate a keypair first.'], 404);
+        }
+
+        if ($user->id === $workspace->owner_id) {
+            return response()->json(['error' => 'That is your own account — the owner already has access.'], 422);
+        }
+
+        if ($workspace->members()->where('user_id', $user->id)->exists()) {
+            return response()->json(['error' => 'That user is already a member of this workspace.'], 422);
+        }
+
+        return response()->json([
+            'user_id' => $user->id,
+            'public_key' => $user->public_key,
         ]);
     }
 

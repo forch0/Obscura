@@ -78,6 +78,7 @@ Route::middleware(['auth', 'keypair'])->group(function () {
     Route::prefix('workspaces/{workspace}')->group(function () {
         Route::get('members', [WorkspaceMemberController::class, 'index'])->name('workspaces.members');
         Route::post('members', [WorkspaceMemberController::class, 'store'])->name('workspaces.members.store')->middleware('throttle:writes');
+        Route::post('members/lookup', [WorkspaceMemberController::class, 'lookup'])->name('workspaces.members.lookup')->middleware('throttle:writes');
         Route::put('members/{member}', [WorkspaceMemberController::class, 'update'])->name('workspaces.members.update')->middleware('throttle:writes');
         Route::delete('members/{member}', [WorkspaceMemberController::class, 'destroy'])->name('workspaces.members.destroy')->middleware('throttle:writes');
     });
