@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "obscura/gallery",
     "type": "project",
-    "description": "Obscura — a private, end-to-end encrypted gallery platform built on Laravel.",
+    "description": "Obscura — a zero-trust content storage platform built on Laravel.",
     "keywords": ["laravel", "gallery", "encrypted", "e2ee", "obscura"],
     "license": "MIT",
     "require": {

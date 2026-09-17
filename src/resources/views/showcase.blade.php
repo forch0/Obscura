@@ -54,9 +54,9 @@
 
 <section class="cs-hero">
     <p class="eyebrow">Case Study</p>
-    <h1>Obscura — zero-knowledge galleries, engineered end to end</h1>
+    <h1>Obscura — zero-trust content storage, engineered end to end</h1>
     <p>
-        A private gallery platform where the server is provably blind to user content.
+        A private content platform where the server is provably blind to user content.
         Designed, built, and tested as a demonstration of security-first product engineering.
     </p>
 </section>
@@ -67,8 +67,8 @@
     <section>
         <h2>The problem</h2>
         <p>
-            Consumer gallery platforms force a bad bargain: convenience for exposure. Storage providers
-            hold decryption keys, thumbnails leak through public URLs, and "private" usually means
+            Consumer storage platforms force a bad bargain: convenience for exposure. Storage providers
+            hold decryption keys, files leak through public URLs, and "private" usually means
             "private until someone asks for the key."
         </p>
         <p style="margin-top:12px">
@@ -77,7 +77,7 @@
             browser before transit. A full database dump yields metadata, not content.
         </p>
         <div class="cs-quote">
-            "If the operator can read your gallery, it's not private. I designed the system so
+            "If the operator can read your content, it's not private. I designed the system so
             that even the platform super-admin is cryptographically locked out."
             <span>— Design constraint #1, recorded in docs/DECISIONS.md</span>
         </div>

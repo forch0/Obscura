@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Obscura — Private Encrypted Photo & Video Galleries')
+@section('title', 'Obscura — Zero-Trust Content Storage')
 
 @section('content')
 <style>
@@ -32,12 +32,12 @@
 @endauth
 
 <section class="hero">
-    <h1>Private, encrypted<br>photo &amp; video galleries.</h1>
+    <h1>Zero-trust storage<br>for your private content.</h1>
     <p>
-        Obscura is an end-to-end encrypted gallery workspace built for photos and
-        videos — with PDF support too. Everything is encrypted in your browser
-        before it reaches the server. Upload, organize, share, and revoke —
-        all with zero-knowledge architecture.
+        Obscura is a zero-trust content vault — not just a gallery app. Photos,
+        videos, documents, files: everything is encrypted in your browser before
+        it reaches the server. Upload, organize, share, and revoke — on storage
+        the server itself cannot read.
     </p>
     <div class="hero-ctas">
         <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Create Account</a>
@@ -47,7 +47,7 @@
 
 <section class="features">
     <h2>Everything encrypted. Nothing exposed.</h2>
-    <p class="subtitle">Every name, title, caption, image, video, and document is encrypted client-side. The server stores only ciphertext.</p>
+    <p class="subtitle">Every name, title, caption, and byte of content is encrypted client-side. The server stores only ciphertext it cannot read.</p>
 
     <div class="feature-grid">
         <div class="feature-card">
@@ -59,20 +59,20 @@
             <p>Generate scoped, time-boxed codes for sharing. Viewers don't need accounts. Revoke any code instantly — or re-key the workspace to invalidate all of them.</p>
         </div>
         <div class="feature-card">
-            <h3>Collections &amp; Galleries</h3>
-            <p>Organize galleries inside collections. Choose private, shared, or joint galleries with per-member roles — owner, editor, or viewer.</p>
+            <h3>Organized &amp; Scoped</h3>
+            <p>Structure content into collections and galleries. Choose private, shared, or joint galleries with per-member roles — owner, editor, or viewer.</p>
         </div>
         <div class="feature-card">
             <h3>Hard Revocation</h3>
             <p>Re-key rotates the workspace encryption key, re-wraps all media keys, and invalidates every outstanding access code in one atomic operation.</p>
         </div>
         <div class="feature-card">
-            <h3>Zero-Knowledge Server</h3>
-            <p>Names, descriptions, titles, captions, and media content are all encrypted. Even the Super Admin cannot decrypt your files.</p>
+            <h3>Zero-Trust Server</h3>
+            <p>The server is a ciphertext store and an authorization gate — nothing more. Names, descriptions, and content are all encrypted. Even the Super Admin is cryptographically locked out.</p>
         </div>
         <div class="feature-card">
-            <h3>Photos, Video &amp; PDFs</h3>
-            <p>Photos and videos are first-class — encrypted thumbnails, lightbox viewing, inline playback. PDFs get the same treatment with in-browser viewing.</p>
+            <h3>Any Content Type</h3>
+            <p>Photos and videos are first-class — encrypted thumbnails, lightbox viewing, inline playback. Documents and PDFs get the same zero-knowledge treatment.</p>
         </div>
         <div class="feature-card">
             <h3>Self-Hostable</h3>

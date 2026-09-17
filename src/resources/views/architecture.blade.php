@@ -55,7 +55,7 @@
 
 <section class="arch-hero">
     <h1>Architecture</h1>
-    <p>How Obscura achieves zero-knowledge encryption end-to-end — key hierarchy, data flows, and the design decisions behind them.</p>
+    <p>How Obscura achieves zero-trust content storage — key hierarchy, data flows, and the design decisions behind them.</p>
 </section>
 
 <div class="arch-section">
@@ -79,7 +79,7 @@
     <section id="overview">
         <h2>1. Overview</h2>
         <p>
-            Obscura is a <strong>zero-knowledge encrypted gallery platform</strong>. The guiding constraint:
+            Obscura is a <strong>zero-trust content storage platform</strong>. The guiding constraint:
             <strong>the server must never be able to read user content</strong> — not names, not captions, not image bytes.
             All cryptography happens in the browser via the Web Crypto API. The server is a ciphertext store
             and an authorization gate, nothing more.

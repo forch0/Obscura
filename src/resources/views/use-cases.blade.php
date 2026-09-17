@@ -39,7 +39,7 @@
 
 <section class="uc-hero">
     <h1>Use Cases</h1>
-    <p>How teams and individuals use Obscura for private, encrypted photo and video sharing — with PDF support for documents.</p>
+    <p>How teams and individuals use Obscura for zero-trust content storage — photos, videos, documents, and anything that must stay private.</p>
 </section>
 
 <section class="uc-section">
@@ -100,9 +100,9 @@
         <span class="tag">Personal</span>
         <h2>Family Archives</h2>
         <p>
-            Keep family photos private without trusting a cloud provider's
+            Keep family photos, documents, and records private without trusting a cloud provider's
             encryption-at-rest promises. Obscura encrypts in your browser —
-            the server literally cannot read your photos. Share specific
+            the server literally cannot read your content. Share specific
             galleries with family via access codes, keep the rest private.
         </p>
         <ul>
