@@ -3,10 +3,10 @@
 @section('title', 'Gallery — Obscura')
 
 @section('content')
+    <p class="text-caption" style="margin-bottom:8px"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to collection</a></p>
     <div class="page-header keep-row">
         <div>
-            <p class="text-caption"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to collection</a></p>
-            <h2 id="gallery-name" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
+            <h2 id="gallery-name"><span class="spinner"></span> Decrypting…</h2>
             <p id="gallery-type" class="text-caption"></p>
         </div>
         <div class="flex gap-2" style="flex-wrap:wrap">

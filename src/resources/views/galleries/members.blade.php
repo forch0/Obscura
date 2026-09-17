@@ -3,10 +3,10 @@
 @section('title', 'Gallery Members — Obscura')
 
 @section('content')
-    <div class="page-header">
+    <p class="text-caption" style="margin-bottom:8px"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
+    <div class="page-header keep-row">
         <div>
-            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
-            <h2 style="margin-top:4px">Gallery Members</h2>
+            <h2>Gallery Members</h2>
             <p class="text-caption"><span class="badge {{ $gallery->type === 'joint' ? 'badge-secondary' : 'badge-primary' }}">{{ ucfirst($gallery->type) }}</span></p>
         </div>
     </div>

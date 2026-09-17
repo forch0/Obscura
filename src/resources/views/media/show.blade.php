@@ -3,11 +3,9 @@
 @section('title', 'Media — Obscura')
 
 @section('content')
+    <p class="text-caption" style="margin-bottom:8px"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
     <div class="page-header keep-row">
-        <div>
-            <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
-            <h2 id="media-title" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
-        </div>
+        <h2 id="media-title"><span class="spinner"></span> Decrypting…</h2>
         <form method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline" onsubmit="return confirm('Delete this media?')">
             @csrf
             @method('DELETE')
