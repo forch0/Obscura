@@ -7,6 +7,9 @@
         <h2 id="workspace-name"><span class="spinner"></span> Decrypting…</h2>
         <div class="flex gap-2" style="flex-wrap:wrap">
             <x-button variant="secondary" size="sm" href="{{ route('collections.index', $workspace) }}">Collections</x-button>
+            @can('update', $workspace)
+                <x-button variant="secondary" size="sm" href="{{ route('workspaces.members', $workspace) }}">Members</x-button>
+            @endcan
             <x-button variant="secondary" size="sm" href="{{ route('access-codes.index', $workspace) }}">Codes</x-button>
             <x-dropdown label="Manage" variant="secondary" size="sm" align="right">
                 <x-dropdown.item href="{{ route('workspaces.edit', $workspace) }}">Rename</x-dropdown.item>

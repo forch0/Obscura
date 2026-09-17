@@ -14,9 +14,16 @@
     <div class="card" style="max-width:560px;margin-bottom:24px">
         <h3>Add Member</h3>
         <p class="text-caption text-secondary" style="margin-bottom:16px">Members must already be workspace members.</p>
+        @if($eligible->isNotEmpty())
         <form method="POST" action="{{ route('galleries.members.store', [$collection, $gallery]) }}">
             @csrf
-            <x-input label="User ID" name="user_id" placeholder="UUID of workspace member" required />
+            <div class="form-group">
+                <label class="form-label">Workspace Member</label>
+                <x-select name="user_id" id="user_id" :options="$eligible->map(fn($m) => [
+                    'value' => $m->user_id,
+                    'label' => $m->user->email,
+                ])->all()" />
+            </div>
             <div class="form-group">
                 <label class="form-label">Role</label>
                 <x-select name="role" id="role" selected="viewer" :options="collect([
@@ -26,6 +33,9 @@
             </div>
             <x-button type="submit" variant="primary">Add Member</x-button>
         </form>
+        @else
+            <x-empty-state title="No eligible members" message="All workspace members are already in this gallery — or add workspace members first." />
+        @endif
     </div>
 
     <h3 style="margin-bottom:12px">Current Members</h3>

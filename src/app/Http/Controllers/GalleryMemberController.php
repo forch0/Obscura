@@ -20,11 +20,17 @@ class GalleryMemberController extends Controller
 
         $members = $gallery->members()->with('user')->get();
 
+        $eligible = $gallery->collection->workspace->members()
+            ->with('user')
+            ->whereNotIn('user_id', $members->pluck('user_id'))
+            ->get();
+
         return view('galleries.members', [
             'workspace' => $gallery->collection->workspace,
             'collection' => $gallery->collection,
             'gallery' => $gallery,
             'members' => $members,
+            'eligible' => $eligible,
         ]);
     }
 

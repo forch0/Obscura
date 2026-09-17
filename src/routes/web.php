@@ -16,6 +16,7 @@ use App\Http\Controllers\GalleryMemberController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\RekeyController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\WorkspaceMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -72,6 +73,14 @@ Route::middleware(['auth', 'keypair'])->group(function () {
     Route::resource('workspaces', WorkspaceController::class)
         ->middlewareFor('store', 'throttle:writes')
         ->middlewareFor(['update', 'destroy'], 'throttle:writes');
+
+    // Workspace members (owner-only, scoped under workspace)
+    Route::prefix('workspaces/{workspace}')->group(function () {
+        Route::get('members', [WorkspaceMemberController::class, 'index'])->name('workspaces.members');
+        Route::post('members', [WorkspaceMemberController::class, 'store'])->name('workspaces.members.store')->middleware('throttle:writes');
+        Route::put('members/{member}', [WorkspaceMemberController::class, 'update'])->name('workspaces.members.update')->middleware('throttle:writes');
+        Route::delete('members/{member}', [WorkspaceMemberController::class, 'destroy'])->name('workspaces.members.destroy')->middleware('throttle:writes');
+    });
 
     // Access codes (owner-only, scoped under workspace)
     Route::prefix('workspaces/{workspace}')->group(function () {

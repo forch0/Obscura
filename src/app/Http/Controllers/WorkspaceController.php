@@ -18,7 +18,9 @@ class WorkspaceController extends Controller
     {
         $workspaces = $request->user()->is_super_admin
             ? Workspace::latest()->get()
-            : Workspace::where('owner_id', $request->user()->id)->latest()->get();
+            : Workspace::where('owner_id', $request->user()->id)
+                ->orWhereHas('members', fn ($q) => $q->where('user_id', $request->user()->id))
+                ->latest()->get();
 
         return view('workspaces.index', ['workspaces' => $workspaces]);
     }
