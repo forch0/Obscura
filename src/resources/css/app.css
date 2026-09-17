@@ -701,6 +701,12 @@ select.form-input { cursor: pointer; }
     }
     .page-header .flex { flex-wrap: wrap; }
     .page-header .btn { flex: 0 0 auto; }
+
+    .page-header.keep-row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
 }
 
 /* ============================================
