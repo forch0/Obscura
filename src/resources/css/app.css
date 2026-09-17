@@ -400,6 +400,136 @@ h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
 }
 
 /* ============================================
+   Lightbox (gallery media viewer)
+   ============================================ */
+
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: hsl(0 0% 0% / 0.92);
+    display: none;
+    flex-direction: column;
+}
+
+.lightbox.open { display: flex; }
+
+.lightbox-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    color: hsl(0 0% 100%);
+    flex-shrink: 0;
+}
+
+.lightbox-counter {
+    font-size: 0.8125rem;
+    color: hsl(0 0% 100% / 0.7);
+    font-variant-numeric: tabular-nums;
+}
+
+.lightbox-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 40vw;
+}
+
+.lightbox-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    background: none;
+    border: none;
+    color: hsl(0 0% 100%);
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.lightbox-close:hover { background: hsl(0 0% 100% / 0.12); }
+
+.lightbox-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 0;
+    padding: 0 56px 16px;
+}
+
+.lightbox-media {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-media img,
+.lightbox-media video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.lightbox-media iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 4px;
+    background: hsl(0 0% 100%);
+}
+
+.lightbox-media.lb-pdf {
+    width: min(92vw, 960px);
+    height: 100%;
+}
+
+.lightbox-media .file-fallback {
+    text-align: center;
+    color: hsl(0 0% 100% / 0.85);
+}
+
+.lightbox-media .file-fallback .file-glyph { font-size: 3rem; }
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    background: hsl(0 0% 100% / 0.08);
+    border: 1px solid hsl(0 0% 100% / 0.15);
+    color: hsl(0 0% 100%);
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background var(--transition);
+}
+
+.lightbox-nav:hover { background: hsl(0 0% 100% / 0.18); }
+.lightbox-nav:disabled { opacity: 0.3; cursor: default; }
+
+.lightbox-prev { left: 8px; }
+.lightbox-next { right: 8px; }
+
+@media (max-width: 640px) {
+    .lightbox-body { padding: 0 8px 8px; }
+    .lightbox-nav { width: 36px; height: 36px; }
+    .lightbox-title { max-width: 50vw; }
+}
+
+/* ============================================
    Cards
    ============================================ */
 
