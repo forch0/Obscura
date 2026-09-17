@@ -3,7 +3,7 @@
 @section('title', 'Workspace — Obscura')
 
 @section('content')
-    <div class="page-header">
+    <div class="page-header keep-row">
         <h2 id="workspace-name"><span class="spinner"></span> Decrypting…</h2>
         <div class="flex gap-2" style="flex-wrap:wrap">
             <x-button variant="secondary" size="sm" href="{{ route('collections.index', $workspace) }}">Collections</x-button>

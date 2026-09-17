@@ -3,18 +3,26 @@
 @section('title', 'Gallery — Obscura')
 
 @section('content')
-    <div class="page-header">
+    <div class="page-header keep-row">
         <div>
             <p class="text-caption"><a href="{{ route('collections.show', [$workspace, $collection]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to collection</a></p>
             <h2 id="gallery-name" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
             <p id="gallery-type" class="text-caption"></p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2" style="flex-wrap:wrap">
             @if($gallery->type !== 'private')
-                <x-button variant="secondary" href="{{ route('galleries.members', [$collection, $gallery]) }}">Members</x-button>
+                <x-button variant="secondary" class="btn-responsive" href="{{ route('galleries.members', [$collection, $gallery]) }}">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span class="btn-label">Members</span>
+                </x-button>
             @endif
-            <x-button variant="secondary" href="{{ route('galleries.edit', [$collection, $gallery]) }}">Edit</x-button>
-            <x-button variant="primary" id="upload-btn">Upload</x-button>
+            <x-button variant="secondary" class="btn-responsive" href="{{ route('galleries.edit', [$collection, $gallery]) }}">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                <span class="btn-label">Edit</span>
+            </x-button>
+            <x-button variant="primary" id="upload-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload</x-button>
             <input type="file" id="upload-input" accept="image/*,video/*,.heic,.heif,application/pdf" style="display:none">
         </div>
     </div>

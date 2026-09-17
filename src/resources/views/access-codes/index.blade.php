@@ -3,9 +3,11 @@
 @section('title', 'Access Codes â€” Obscura')
 
 @section('content')
-    <div class="page-header">
+    <div class="page-header keep-row">
         <h2>Access Codes</h2>
-        <x-button variant="primary" pill href="{{ route('access-codes.create', $workspace) }}">New Code</x-button>
+        <x-button variant="primary" size="md" pill href="{{ route('access-codes.create', $workspace) }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14" style="vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Code</x-button>
     </div>
 
     <div id="codes-list">
@@ -49,8 +51,8 @@
                     <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:12px">
                         <div>
                             <h3 style="margin-bottom:4px">${c.label || 'Untitled'}</h3>
-                            <p class="text-caption text-secondary">${c.scope} Â&middot; ${c.permission_names.join(' Â&middot; ')}</p>
-                            <p class="text-caption text-muted">Uses: ${c.use_count}${c.max_uses > 0 ? ' / ' + c.max_uses : ''} Â&middot; Expires: ${new Date(c.expires_at).toLocaleString()}</p>
+                            <p class="text-caption text-secondary">${c.scope} ï¿½&middot; ${c.permission_names.join(' ï¿½&middot; ')}</p>
+                            <p class="text-caption text-muted">Uses: ${c.use_count}${c.max_uses > 0 ? ' / ' + c.max_uses : ''} ï¿½&middot; Expires: ${new Date(c.expires_at).toLocaleString()}</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="badge ${statusClass}">${status}</span>

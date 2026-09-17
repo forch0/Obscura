@@ -3,7 +3,7 @@
 @section('title', 'Media — Obscura')
 
 @section('content')
-    <div class="page-header">
+    <div class="page-header keep-row">
         <div>
             <p class="text-caption"><a href="{{ route('galleries.show', [$collection, $gallery]) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to gallery</a></p>
             <h2 id="media-title" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
@@ -11,7 +11,10 @@
         <form method="POST" action="{{ route('media.destroy', $media) }}" style="display:inline" onsubmit="return confirm('Delete this media?')">
             @csrf
             @method('DELETE')
-            <x-button type="submit" variant="danger">Delete</x-button>
+            <x-button type="submit" variant="danger" class="btn-responsive">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span class="btn-label">Delete</span>
+            </x-button>
         </form>
     </div>
 

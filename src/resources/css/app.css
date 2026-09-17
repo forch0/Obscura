@@ -709,6 +709,15 @@ select.form-input { cursor: pointer; }
     }
 }
 
+/* Icon-only buttons on mobile — hide label, show icon */
+.btn .btn-icon { display: none; }
+
+@media (max-width: 640px) {
+    .btn-responsive .btn-label { display: none; }
+    .btn-responsive .btn-icon { display: inline; }
+    .btn-responsive { padding: 0 10px; }
+}
+
 /* ============================================
    Empty state
    ============================================ */

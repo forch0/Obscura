@@ -3,14 +3,19 @@
 @section('title', 'Collection — Obscura')
 
 @section('content')
-    <div class="page-header">
+    <div class="page-header keep-row">
         <div>
             <p class="text-caption"><a href="{{ route('collections.index', $workspace) }}" style="color:hsl(var(--foreground));text-decoration:none">← Back to workspace</a></p>
             <h2 id="collection-name" style="margin-top:4px"><span class="spinner"></span> Decrypting…</h2>
         </div>
         <div class="flex gap-2">
-            <x-button variant="primary" pill href="{{ route('galleries.create', $collection) }}">New Gallery</x-button>
-            <x-button variant="secondary" href="{{ route('collections.edit', [$workspace, $collection]) }}">Rename</x-button>
+            <x-button variant="primary" size="md" pill href="{{ route('galleries.create', $collection) }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14" style="vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New Gallery</x-button>
+            <x-button variant="secondary" class="btn-responsive" href="{{ route('collections.edit', [$workspace, $collection]) }}">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                <span class="btn-label">Rename</span>
+            </x-button>
         </div>
     </div>
 
